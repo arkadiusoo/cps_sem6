@@ -35,7 +35,7 @@ class SignalGeneratorApp(QWidget):
 
     def init_ui(self):
         self.setWindowTitle("Generator Sygnałów")
-        self.setGeometry(100, 100, 600, 400)  # Powiększamy okno
+        self.setGeometry(100, 100, 800, 600)  # Powiększamy okno
 
         # Wybór sygnału
         self.label_signal = QLabel("Wybierz sygnał:")
