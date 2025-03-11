@@ -1,10 +1,13 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QComboBox, QSpinBox, QFileDialog
+import logging
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QComboBox, QSpinBox, QFileDialog, QMessageBox
 
 import signal_generator
 import plotter
 import file_manager
 
+# Konfiguracja logowania
+logging.basicConfig(filename="app_errors.log", level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class SignalGeneratorApp(QWidget):
     def __init__(self):
@@ -33,14 +36,12 @@ class SignalGeneratorApp(QWidget):
         self.spin_amp = QSpinBox()
         self.spin_amp.setRange(1, 100)
 
-        
         self.label_duration = QLabel("Czas trwania:")
         self.spin_duration = QSpinBox()
         self.spin_duration.setRange(1, 10)
 
         self.btn_generate = QPushButton("Generuj sygnał")
         self.btn_generate.clicked.connect(self.generate_signal)
-
 
         self.btn_save = QPushButton("Zapisz do pliku")
         self.btn_save.clicked.connect(self.save_signal)
@@ -58,21 +59,37 @@ class SignalGeneratorApp(QWidget):
         self.setLayout(layout)
 
     def generate_signal(self):
-        signal_type = self.combo_signal.currentText()
-        amplitude = self.spin_amp.value()
-        duration = self.spin_duration.value()
+        try:
+            signal_type = self.combo_signal.currentText()
+            amplitude = self.spin_amp.value()
+            duration = self.spin_duration.value()
 
-        self.current_signal, time = signal_generator.generate_signal(signal_type, amplitude, duration)
+            self.current_signal, time = signal_generator.generate_signal(signal_type, amplitude, duration)
 
-        plotter.plot_signal(time, self.current_signal, signal_type)
+            plotter.plot_signal(time, self.current_signal, signal_type)
+        except Exception as e:
+            logging.error(f"Błąd podczas generowania sygnału: {e}")
+            self.show_error_message("Błąd generowania sygnału", str(e))
 
     def save_signal(self):
-        if hasattr(self, 'current_signal'):
-            file_name, _ = QFileDialog.getSaveFileName(self, "Zapisz plik", "", "Pliki binarne (*.bin)")
-            if file_name:
-                file_manager.save_signal(file_name, self.current_signal)
-        else:
-            print("Najpierw wygeneruj sygnał!")
+        try:
+            if hasattr(self, 'current_signal') and self.current_signal is not None:
+                file_name, _ = QFileDialog.getSaveFileName(self, "Zapisz plik", "", "Pliki binarne (*.bin)")
+                if file_name:
+                    file_manager.save_signal(file_name, self.current_signal)
+            else:
+                raise ValueError("Najpierw wygeneruj sygnał!")
+        except Exception as e:
+            logging.error(f"Błąd zapisu pliku: {e}")
+            self.show_error_message("Błąd zapisu pliku", str(e))
+
+    def show_error_message(self, title, message):
+        msg = QMessageBox(self)
+        print(self)
+        msg.setIcon(QMessageBox.Icon.Critical)
+        msg.setWindowTitle(title)
+        msg.setText(message)
+        msg.exec()
 
 
 if __name__ == "__main__":
