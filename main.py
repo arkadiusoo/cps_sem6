@@ -1,6 +1,7 @@
 import sys
 import logging
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QComboBox, QSpinBox, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QPushButton,
+                             QVBoxLayout, QComboBox, QSpinBox, QFileDialog, QMessageBox)
 
 import signal_generator
 import plotter
@@ -85,7 +86,6 @@ class SignalGeneratorApp(QWidget):
 
     def show_error_message(self, title, message):
         msg = QMessageBox(self)
-        print(self)
         msg.setIcon(QMessageBox.Icon.Critical)
         msg.setWindowTitle(title)
         msg.setText(message)
