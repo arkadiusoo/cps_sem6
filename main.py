@@ -1,6 +1,6 @@
 import sys
 import logging
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QComboBox, QSpinBox, QFileDialog
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox, QSpinBox, QFileDialog, QListWidget
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import signal_generator
@@ -31,11 +31,12 @@ class SignalGeneratorApp(QWidget):
     def __init__(self):
         super().__init__()
         self.current_signal = None
+        self.signals_list = []  # Lista przechowywanych sygnałów
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("Generator Sygnałów")
-        self.setGeometry(100, 100, 800, 600)  # Powiększamy okno
+        self.setGeometry(100, 100, 1000, 600)  # Powiększamy okno
 
         # Wybór sygnału
         self.label_signal = QLabel("Wybierz sygnał:")
@@ -64,19 +65,28 @@ class SignalGeneratorApp(QWidget):
         # Widget Matplotlib do rysowania wykresów
         self.plot_canvas = MatplotlibCanvas(self)
 
-        # Layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.label_signal)
-        layout.addWidget(self.combo_signal)
-        layout.addWidget(self.label_amp)
-        layout.addWidget(self.spin_amp)
-        layout.addWidget(self.label_duration)
-        layout.addWidget(self.spin_duration)
-        layout.addWidget(self.btn_generate)
-        layout.addWidget(self.btn_save)
-        layout.addWidget(self.plot_canvas)  # Dodajemy wykres do okna
+        # Lista wygenerowanych wykresów
+        self.list_signals = QListWidget()
+        self.list_signals.setFixedWidth(250)
+        self.list_signals.itemClicked.connect(self.display_selected_signal)  # Kliknięcie na element listy
 
-        self.setLayout(layout)
+        # Layouty
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.label_signal)
+        left_layout.addWidget(self.combo_signal)
+        left_layout.addWidget(self.label_amp)
+        left_layout.addWidget(self.spin_amp)
+        left_layout.addWidget(self.label_duration)
+        left_layout.addWidget(self.spin_duration)
+        left_layout.addWidget(self.btn_generate)
+        left_layout.addWidget(self.btn_save)
+        left_layout.addWidget(self.plot_canvas)
+
+        main_layout = QHBoxLayout()
+        main_layout.addLayout(left_layout)  # Lewa część: GUI + wykres
+        main_layout.addWidget(self.list_signals)  # Prawa część: Lista wykresów
+
+        self.setLayout(main_layout)
 
     def generate_signal(self):
         try:
@@ -88,6 +98,11 @@ class SignalGeneratorApp(QWidget):
 
             # Rysowanie wykresu w GUI
             self.plot_canvas.plot(time, self.current_signal, signal_type)
+
+            # Zapisanie do listy sygnałów
+            signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
+            self.signals_list.append((time, self.current_signal, signal_info))
+            self.list_signals.addItem(signal_info)
 
         except Exception as e:
             logging.error(f"Błąd podczas generowania sygnału: {e}")
@@ -104,6 +119,13 @@ class SignalGeneratorApp(QWidget):
         except Exception as e:
             logging.error(f"Błąd zapisu pliku: {e}")
             self.show_error_message("Błąd zapisu pliku", str(e))
+
+    def display_selected_signal(self, item):
+        index = self.list_signals.row(item)  # Pobranie indeksu klikniętego elementu
+        time, signal, signal_info = self.signals_list[index]
+
+        # Rysowanie wykresu dla wybranego sygnału
+        self.plot_canvas.plot(time, signal, signal_info)
 
     def show_error_message(self, title, message):
         from PyQt6.QtWidgets import QMessageBox
