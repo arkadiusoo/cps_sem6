@@ -58,6 +58,9 @@ class SignalGeneratorApp(QWidget):
         self.btn_generate = QPushButton("Generuj sygnał")
         self.btn_generate.clicked.connect(self.generate_signal)
 
+        # Przycisk wczytywania
+        self.btn_load = QPushButton("Wczytaj plik")
+        self.btn_load.clicked.connect(self.load_signal)
         # Przycisk zapisu
         self.btn_save = QPushButton("Zapisz do pliku")
         self.btn_save.clicked.connect(self.save_signal)
@@ -79,6 +82,7 @@ class SignalGeneratorApp(QWidget):
         left_layout.addWidget(self.label_duration)
         left_layout.addWidget(self.spin_duration)
         left_layout.addWidget(self.btn_generate)
+        left_layout.addWidget(self.btn_load)
         left_layout.addWidget(self.btn_save)
         left_layout.addWidget(self.plot_canvas)
 
@@ -113,12 +117,39 @@ class SignalGeneratorApp(QWidget):
             if self.current_signal is not None:
                 file_name, _ = QFileDialog.getSaveFileName(self, "Zapisz plik", "", "Pliki binarne (*.bin)")
                 if file_name:
-                    file_manager.save_signal(file_name, self.current_signal)
+                    # Pobranie informacji o sygnale
+                    signal_type = self.combo_signal.currentText()
+                    amplitude = self.spin_amp.value()
+                    duration = self.spin_duration.value()
+
+                    # Wywołanie zapisu w file_manager.py
+                    file_manager.save_signal(file_name, self.current_signal, signal_type, amplitude, duration)
             else:
                 raise ValueError("Najpierw wygeneruj sygnał!")
         except Exception as e:
             logging.error(f"Błąd zapisu pliku: {e}")
             self.show_error_message("Błąd zapisu pliku", str(e))
+
+    def load_signal(self):
+        try:
+            file_name, _ = QFileDialog.getOpenFileName(self, "Otwórz plik", "", "Pliki binarne (*.bin)")
+            if file_name:
+                # Odczytujemy sygnał
+                signal_type, amplitude, duration, signal = file_manager.load_signal(file_name)
+
+                if signal is not None:
+                    time = np.linspace(0, duration, len(signal))  # Tworzymy oś czasu
+
+                    # Rysujemy wczytany wykres
+                    self.plot_canvas.plot(time, signal, f"{signal_type} | A: {amplitude}, T: {duration}s")
+
+                    # Dodajemy do listy wygenerowanych wykresów
+                    signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
+                    self.signals_list.append((time, signal, signal_info))
+                    self.list_signals.addItem(signal_info)
+        except Exception as e:
+            logging.error(f"Błąd odczytu pliku: {e}")
+            self.show_error_message("Błąd odczytu pliku", str(e))
 
     def display_selected_signal(self, item):
         index = self.list_signals.row(item)  # Pobranie indeksu klikniętego elementu
