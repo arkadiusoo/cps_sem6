@@ -60,7 +60,7 @@ class SignalGeneratorApp(QWidget):
         self.btn_generate.clicked.connect(self.generate_signal)
 
         # Przycisk wczytywania
-        self.btn_load = QPushButton("Wczytaj plik")
+        self.btn_load = QPushButton("Wczytaj z pliku")
         self.btn_load.clicked.connect(self.load_signal)
         # Przycisk zapisu
         self.btn_save = QPushButton("Zapisz do pliku")
