@@ -1,5 +1,6 @@
 import sys
 import logging
+import numpy as np
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox, QSpinBox, QFileDialog, QListWidget
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
