@@ -2,7 +2,7 @@ import numpy as np
 import logging
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox,
-    QSpinBox, QFileDialog, QListWidget, QMessageBox
+    QSpinBox, QFileDialog, QListWidget, QMessageBox, QDoubleSpinBox
 )
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect
@@ -58,16 +58,37 @@ class SignalGeneratorApp(QWidget):
             "Szum jednostajny", "Szum gaussowski", "Sygnał sinusoidalny",
             "Sygnał prostokątny", "Sygnał trójkątny"
         ])
-
-        # Amplituda
+        # A
         self.label_amp = QLabel("Amplituda:")
-        self.spin_amp = QSpinBox()
-        self.spin_amp.setRange(1, 100)
+        self.spin_amp = QDoubleSpinBox()
+        self.spin_amp.setRange(0.001, 100.0)
+        self.spin_amp.setSingleStep(0.1)
+        self.spin_amp.setDecimals(3)
+        self.spin_amp.setValue(0.1)
 
-        # Czas trwania
+        # d
         self.label_duration = QLabel("Czas trwania:")
-        self.spin_duration = QSpinBox()
-        self.spin_duration.setRange(1, 10)
+        self.spin_duration = QDoubleSpinBox()
+        self.spin_duration.setRange(0.001, 100.0)
+        self.spin_duration.setSingleStep(0.1)
+        self.spin_duration.setDecimals(3)
+        self.spin_duration.setValue(1)
+
+        # t1
+        self.label_start_time = QLabel("Czas początkowy:")
+        self.spin_start_time = QDoubleSpinBox()
+        self.spin_start_time.setRange(0.001, 100.0)
+        self.spin_start_time.setSingleStep(0.1)
+        self.spin_start_time.setDecimals(3)
+        self.spin_start_time.setValue(0)
+
+        # T
+        self.label_period = QLabel("Okres podstawowy:")
+        self.spin_period = QSpinBox()
+        self.spin_period.setRange(1, 100)
+        self.spin_period.setSingleStep(1)
+        self.spin_period.setValue(5)
+
 
         # Przycisk generacji
         self.btn_generate = QPushButton("Generuj sygnał")
@@ -89,7 +110,7 @@ class SignalGeneratorApp(QWidget):
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
 
-        # Layouty
+        # layouts
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.label_signal)
         left_layout.addWidget(self.combo_signal)
@@ -97,6 +118,10 @@ class SignalGeneratorApp(QWidget):
         left_layout.addWidget(self.spin_amp)
         left_layout.addWidget(self.label_duration)
         left_layout.addWidget(self.spin_duration)
+        left_layout.addWidget(self.label_start_time)
+        left_layout.addWidget(self.spin_start_time)
+        left_layout.addWidget(self.label_period)
+        left_layout.addWidget(self.spin_period)
         left_layout.addWidget(self.btn_generate)
         left_layout.addWidget(self.btn_load)
         left_layout.addWidget(self.btn_save)
