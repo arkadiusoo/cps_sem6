@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox,
     QSpinBox, QFileDialog, QListWidget, QMessageBox
 )
+from PyQt6.QtGui import QGuiApplication
+from PyQt6.QtCore import QRect
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import signal_generator
@@ -36,8 +38,18 @@ class SignalGeneratorApp(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Generator Sygnałów")
-        self.setGeometry(100, 300, 1000, 600)
+        width, height = 1000, 600
+        self.resize(width, height)
+        # available screens
+        screens = QGuiApplication.screens()
+
+        # second screen if available otherwise first by default
+        target_screen = screens[1] if len(screens) > 1 else screens[0]
+        screen_geometry: QRect = target_screen.geometry()
+        # center of the screen
+        x = screen_geometry.x() + (screen_geometry.width() - width) // 2
+        y = screen_geometry.y() + (screen_geometry.height() - height) // 2
+        self.move(x, y)
 
         # Wybór sygnału
         self.label_signal = QLabel("Wybierz sygnał:")
