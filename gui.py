@@ -256,40 +256,6 @@ class SignalGeneratorApp(QWidget):
         self.update_visibility_by_signal_type()
         self.update_visibility_by_sampling_type()
 
-
-    def generate_signal_test(self):
-        #only for testing
-        try:
-            signal_type = self.combo_signal.currentText()
-            sampling_type = self.combo_signal_type.currentText()
-            amplitude = self.spin_amp.value()
-            duration = self.spin_duration.value()
-            bins = self.slider_bins.value()
-
-            # Tymczasowe dane testowe
-            t = np.linspace(0, duration, 1000)
-            y = amplitude * np.sin(2 * np.pi * 5 * t)
-
-            # Wykres funkcji
-            canvas_func = MatplotlibCanvas(self)
-            canvas_func.signal_plot([t, y], [t, y], signal_type=sampling_type, title="Wykres funkcji")
-            self.scroll_layout.addWidget(canvas_func)
-
-            # Histogram
-            canvas_hist = MatplotlibCanvas(self)
-            canvas_hist.plot_histogram(y, bins=bins, title="Histogram amplitudy")
-            self.scroll_layout.addWidget(canvas_hist)
-
-            # Zapis sygnału
-            self.current_signal = y
-            signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
-            self.signals_list.append((t, y, signal_info))
-            self.list_signals.addItem(signal_info)
-
-        except Exception as e:
-            logging.error(f"Błąd podczas generowania sygnału: {e}")
-            self.show_error_message("Błąd generowania sygnału", str(e))
-
     def generate_signal(self):
         try:
 
