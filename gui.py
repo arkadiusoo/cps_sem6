@@ -3,7 +3,7 @@ import logging
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox,
     QSpinBox, QFileDialog, QListWidget, QMessageBox, QDoubleSpinBox,
-    QSlider
+    QSlider, QScrollArea
 )
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect, Qt
@@ -15,10 +15,11 @@ import file_manager
 
 class MatplotlibCanvas(FigureCanvas):
     def __init__(self, parent=None):
-        self.fig = Figure()
+        self.fig = Figure(figsize=(5, 3))  # domyślny rozmiar figury
         self.ax = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
+        self.setMinimumHeight(300)  # <<< to ustawia minimum na wysokość
 
     def signal_plot(self, continuous_data, sampled_data, signal_type="Ciągły", title="Wykres sygnału"):
         self.ax.clear()
@@ -38,7 +39,7 @@ class MatplotlibCanvas(FigureCanvas):
         self.ax.set_xlabel("Czas [s]")
         self.ax.set_ylabel("Amplituda")
         self.ax.grid()
-        self.ax.legend()
+        # self.ax.legend()
         self.draw()
 
     def plot_histogram(self, values, bins=10, title="Histogram amplitudy"):
@@ -147,7 +148,15 @@ class SignalGeneratorApp(QWidget):
         self.btn_save.clicked.connect(self.save_signal)
 
         # Wykres
-        self.plot_canvas = MatplotlibCanvas(self)
+        # self.plot_canvas = MatplotlibCanvas(self)
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+
+        self.scroll_content = QWidget()
+        self.scroll_layout = QVBoxLayout(self.scroll_content)
+        self.scroll_content.setLayout(self.scroll_layout)
+
+        self.scroll_area.setWidget(self.scroll_content)
 
         # Lista wykresów
         self.list_signals = QListWidget()
@@ -214,7 +223,8 @@ class SignalGeneratorApp(QWidget):
         left_layout.addWidget(self.btn_generate)
         left_layout.addWidget(self.btn_load)
         left_layout.addWidget(self.btn_save)
-        left_layout.addWidget(self.plot_canvas)
+        # left_layout.addWidget(self.plot_canvas)
+        left_layout.addWidget(self.scroll_area)
 
         main_layout = QHBoxLayout()
         main_layout.addLayout(left_layout)
@@ -227,6 +237,7 @@ class SignalGeneratorApp(QWidget):
         self.setLayout(main_layout)
         self.update_visibility_by_signal_type()
         self.update_visibility_by_sampling_type()
+
 
 
     # def generate_signal(self):
@@ -248,6 +259,39 @@ class SignalGeneratorApp(QWidget):
     #         logging.error(f"Błąd podczas generowania sygnału: {e}")
     #         self.show_error_message("Błąd generowania sygnału", str(e))
     def generate_signal(self):
+        #only for testing
+        try:
+            signal_type = self.combo_signal.currentText()
+            sampling_type = self.combo_signal_type.currentText()
+            amplitude = self.spin_amp.value()
+            duration = self.spin_duration.value()
+            bins = self.slider_bins.value()
+
+            # Tymczasowe dane testowe
+            t = np.linspace(0, duration, 1000)
+            y = amplitude * np.sin(2 * np.pi * 5 * t)
+
+            # Wykres funkcji
+            canvas_func = MatplotlibCanvas(self)
+            canvas_func.signal_plot([t, y], [t, y], signal_type=sampling_type, title="Wykres funkcji")
+            self.scroll_layout.addWidget(canvas_func)
+
+            # Histogram
+            canvas_hist = MatplotlibCanvas(self)
+            canvas_hist.plot_histogram(y, bins=bins, title="Histogram amplitudy")
+            self.scroll_layout.addWidget(canvas_hist)
+
+            # Zapis sygnału
+            self.current_signal = y
+            signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
+            self.signals_list.append((t, y, signal_info))
+            self.list_signals.addItem(signal_info)
+
+        except Exception as e:
+            logging.error(f"Błąd podczas generowania sygnału: {e}")
+            self.show_error_message("Błąd generowania sygnału", str(e))
+
+    def generate_signal1(self):
         try:
 
             signal_type = self.combo_signal.currentText()
@@ -326,7 +370,7 @@ class SignalGeneratorApp(QWidget):
                 signal_type, amplitude, duration, signal = file_manager.load_signal(file_name)
                 if signal is not None:
                     time = np.linspace(0, duration, len(signal))
-                    self.plot_canvas.signal_plot(time, signal, f"{signal_type} | A: {amplitude}, T: {duration}s")
+                    # self.plot_canvas.signal_plot(time, signal, f"{signal_type} | A: {amplitude}, T: {duration}s")
                     signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
                     self.signals_list.append((time, signal, signal_info))
                     self.list_signals.addItem(signal_info)
@@ -337,7 +381,7 @@ class SignalGeneratorApp(QWidget):
     def display_selected_signal(self, item):
         index = self.list_signals.row(item)
         time, signal, signal_info = self.signals_list[index]
-        self.plot_canvas.signal_plot(time, signal, signal_info)
+        # self.plot_canvas.signal_plot(time, signal, signal_info)
 
     def show_error_message(self, title, message):
         msg = QMessageBox(self)
@@ -360,6 +404,7 @@ class SignalGeneratorApp(QWidget):
 
     def on_bin_slider_changed(self, value):
         self.label_bins_value.setText(str(value))
-        if self.current_signal is not None:
-            self.plot_canvas.plot_histogram(self.current_signal, bins=value)
+        if hasattr(self, "last_hist_canvas") and self.current_signal is not None:
+            self.last_hist_canvas.plot_histogram(self.current_signal, bins=value)
+
 
