@@ -1,15 +1,16 @@
 import numpy as np
 
 
-def uniform_dist_noise(amplitude, start, duration, sample_rate=1000):
+def uniform_dist_noise(amplitude, start, duration, sample_rate=10):
     noise = []
     i = 0
     while i < duration:
         value = 0
         if i > start:
             value = np.random.uniform(-amplitude, amplitude)
-        noise.append(value)
-        i += 1/sample_rate
+        noise.append([value, i])
+        i += 1/(sample_rate*100)
+
     return noise
 
 
@@ -20,17 +21,17 @@ def gauss_noise(amplitude, start, duration, sample_rate=1000):
         value = 0
         if i > start:
             value = np.random.normal(0, amplitude)
-        noise.append(value)
+        noise.append([value, i])
         i += 1/sample_rate
     return noise
 
 
 def sinus(amplitude, period, start, duration, sample_rate=1000):
-    time = np.linspace(start, duration, num=sample_rate)
     sinus = []
-    for i in time:
+    i=0
+    while i < duration:
         sinus.append(amplitude * np.sin(((2 * np.pi) / period) * (i - start)))
-    return sinus, time
+    return sinus
 
 
 def sinus_abs(amplitude, period, start, duration, sample_rate=1000):
