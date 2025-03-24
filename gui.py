@@ -156,13 +156,17 @@ class SignalGeneratorApp(QWidget):
         row3.addWidget(self.spin_period)
         left_layout.addLayout(row3)
 
-        # Row 4
-        row4 = QHBoxLayout()
-        row4.addWidget(self.label_duty)
-        row4.addWidget(self.spin_duty)
-        row4.addWidget(self.label_sampling)
-        row4.addWidget(self.spin_sampling)
-        left_layout.addLayout(row4)
+        # Row 4 – duty cycle only
+        self.duty_row = QHBoxLayout()
+        self.duty_row.addWidget(self.label_duty)
+        self.duty_row.addWidget(self.spin_duty)
+        left_layout.addLayout(self.duty_row)
+
+        # Row 5 – sampling only
+        self.sampling_row = QHBoxLayout()
+        self.sampling_row.addWidget(self.label_sampling)
+        self.sampling_row.addWidget(self.spin_sampling)
+        left_layout.addLayout(self.sampling_row)
 
         # Buttons & plot
         left_layout.addWidget(self.btn_generate)
@@ -174,7 +178,13 @@ class SignalGeneratorApp(QWidget):
         main_layout.addLayout(left_layout)
         main_layout.addWidget(self.list_signals)
 
+        # Update visibility connections
+        self.combo_signal.currentTextChanged.connect(self.update_visibility_by_signal_type)
+        self.combo_signal_type.currentTextChanged.connect(self.update_visibility_by_sampling_type)
+
         self.setLayout(main_layout)
+        self.update_visibility_by_signal_type()
+        self.update_visibility_by_sampling_type()
 
     def generate_signal(self):
         try:
@@ -239,3 +249,15 @@ class SignalGeneratorApp(QWidget):
         msg.setWindowTitle(title)
         msg.setText(message)
         msg.exec()
+
+    def update_visibility_by_signal_type(self):
+        signal_type = self.combo_signal.currentText()
+        show_duty = signal_type in ["Sygnał prostokątny", "Sygnał trójkątny"]
+        self.label_duty.setVisible(show_duty)
+        self.spin_duty.setVisible(show_duty)
+
+    def update_visibility_by_sampling_type(self):
+        sampling_type = self.combo_signal_type.currentText()
+        show_sampling = sampling_type == "Dyskretny"
+        self.label_sampling.setVisible(show_sampling)
+        self.spin_sampling.setVisible(show_sampling)
