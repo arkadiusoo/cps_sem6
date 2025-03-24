@@ -19,14 +19,37 @@ class MatplotlibCanvas(FigureCanvas):
         super().__init__(self.fig)
         self.setParent(parent)
 
-    def plot(self, x, y, title="Wykres sygnału"):
+    def signal_plot(self, continuous_data, sampled_data, signal_type="Ciągły", title="Wykres sygnału"):
         self.ax.clear()
-        self.ax.plot(x, y, label=title)
+
+        # Unpack data: [time, value]
+        t_cont, y_cont = continuous_data
+        t_samp, y_samp = sampled_data
+
+        # Draw original (continuous) function
+        self.ax.plot(t_cont, y_cont, label="Funkcja oryginalna", color='blue')
+
+        # Draw sampled points only if signal_type is 'Ciągły'
+        if signal_type == "Ciągły":
+            self.ax.plot(t_samp, y_samp, 'ro', label="Próbkowanie")  # czerwone kropki
+
         self.ax.set_title(title)
-        self.ax.set_xlabel("Czas")
+        self.ax.set_xlabel("Czas [s]")
         self.ax.set_ylabel("Amplituda")
         self.ax.grid()
-        # self.ax.legend()
+        self.ax.legend()
+        self.draw()
+
+    def plot_histogram(self, values, bins=10, title="Histogram amplitudy"):
+        self.ax.clear()
+
+        # Draw histogram
+        self.ax.hist(values, bins=bins, color="darkorange", edgecolor="black")
+
+        self.ax.set_title(title)
+        self.ax.set_xlabel("Amplituda")
+        self.ax.set_ylabel("Liczba wystąpień")
+        self.ax.grid()
         self.draw()
 
 
@@ -283,7 +306,7 @@ class SignalGeneratorApp(QWidget):
                 signal_type, amplitude, duration, signal = file_manager.load_signal(file_name)
                 if signal is not None:
                     time = np.linspace(0, duration, len(signal))
-                    self.plot_canvas.plot(time, signal, f"{signal_type} | A: {amplitude}, T: {duration}s")
+                    self.plot_canvas.signal_plot(time, signal, f"{signal_type} | A: {amplitude}, T: {duration}s")
                     signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
                     self.signals_list.append((time, signal, signal_info))
                     self.list_signals.addItem(signal_info)
@@ -294,7 +317,7 @@ class SignalGeneratorApp(QWidget):
     def display_selected_signal(self, item):
         index = self.list_signals.row(item)
         time, signal, signal_info = self.signals_list[index]
-        self.plot_canvas.plot(time, signal, signal_info)
+        self.plot_canvas.signal_plot(time, signal, signal_info)
 
     def show_error_message(self, title, message):
         msg = QMessageBox(self)
