@@ -276,13 +276,13 @@ class SignalGeneratorApp(QWidget):
                 if sampling_type == "Dyskretny":
                     signal_list, sampling_list = signal_generator.uniform_dist_noise(amplitude, start_time, duration, sampling_value)
                 else:
-                    signal_generator.uniform_dist_noise(amplitude, start_time, duration)
+                    signal_list, sampling_list = signal_generator.uniform_dist_noise(amplitude, start_time, duration)
 
             elif signal_type == "Szum gaussowski":
                 if sampling_type == "Dyskretny":
-                    signal_generator.gauss_noise(amplitude, start_time, duration, sampling_value)
+                    signal_list, sampling_list = signal_generator.gauss_noise(amplitude, start_time, duration, sampling_value)
                 else:
-                    signal_generator.gauss_noise(amplitude, start_time, duration)
+                    signal_list, sampling_list = signal_generator.gauss_noise(amplitude, start_time, duration)
 
             elif signal_type == "Sygnał sinusoidalny":
                 if sampling_type == "Dyskretny":
@@ -292,45 +292,45 @@ class SignalGeneratorApp(QWidget):
 
             elif signal_type == "Sygnał sinusoidalny":
                 if sampling_type == "Dyskretny":
-                    signal_generator.sinus(amplitude, period, start_time, duration, sampling_value)
+                    signal_list, sampling_list = signal_generator.sinus(amplitude, period, start_time, duration, sampling_value)
                 else:
-                    signal_generator.sinus(amplitude, period, start_time, duration)
+                    signal_list, sampling_list = signal_generator.sinus(amplitude, period, start_time, duration)
 
             elif signal_type == "Sygnał sinusoidalny wyprostowany jednopołówkowo":
                 if sampling_type == "Dyskretny":
-                    signal_generator.sinus_abs(amplitude, period, start_time, duration, sampling_value)
+                    signal_list, sampling_list = signal_generator.sinus_abs(amplitude, period, start_time, duration, sampling_value)
                 else:
-                    signal_generator.sinus_abs(amplitude, period, start_time, duration)
+                    signal_list, sampling_list = signal_generator.sinus_abs(amplitude, period, start_time, duration)
 
             elif signal_type == "Sygnał sinusoidalny wyprostowany dwupołówkowo":
                 if sampling_type == "Dyskretny":
-                    signal_generator.sinus_one_half(amplitude, period, start_time, duration, sampling_value)
+                    signal_list, sampling_list = signal_generator.sinus_one_half(amplitude, period, start_time, duration, sampling_value)
                 else:
                     signal_generator.sinus_one_half(amplitude, period, start_time, duration)
 
             elif signal_type == "Sygnał prostokątny":
                 if sampling_type == "Dyskretny":
-                    signal_generator.square_classic(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                    signal_list, sampling_list = signal_generator.square_classic(amplitude, period, start_time, duration, duty_cycle, sampling_value)
                 else:
-                    signal_generator.square_classic(amplitude, period, start_time, duration, duty_cycle)
+                    signal_list, sampling_list = signal_generator.square_classic(amplitude, period, start_time, duration, duty_cycle)
 
             elif signal_type == "Sygnał prostokątny symetryczny":
                 if sampling_type == "Dyskretny":
-                    signal_generator.square_simetric(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                    signal_list, sampling_list = signal_generator.square_simetric(amplitude, period, start_time, duration, duty_cycle, sampling_value)
                 else:
-                    signal_generator.square_simetric(amplitude, period, start_time, duration, duty_cycle)
+                    signal_list, sampling_list = signal_generator.square_simetric(amplitude, period, start_time, duration, duty_cycle)
 
             elif signal_type == "Sygnał trójkątny":
                 if sampling_type == "Dyskretny":
-                    signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                    signal_list, sampling_list = signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
                 else:
-                    signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                    signal_list, sampling_list = signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
 
             elif signal_type == "Skok jednostkowy":
                 if sampling_type == "Dyskretny":
-                    signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
+                    signal_list, sampling_list = signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
                 else:
-                    signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
+                    signal_list, sampling_list = signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
 
             elif signal_type == "Impuls jednostkowy":
                 if sampling_type == "Dyskretny":
@@ -345,8 +345,9 @@ class SignalGeneratorApp(QWidget):
                     pass
             else:
                 raise Exception("There is no such signal type! ({}).".format(signal_type))
+            # print("to co dostaje w gui")
+            # print(signal_list, sampling_list)
 
-            print(signal_list, sampling_list)
         except Exception as e:
             logging.error(f"Błąd podczas generowania sygnału: {e}")
             self.show_error_message("Błąd generowania sygnału", str(e))
@@ -398,7 +399,7 @@ class SignalGeneratorApp(QWidget):
 
     def update_visibility_by_signal_type(self):
         signal_type = self.combo_signal.currentText()
-        show_duty = signal_type in ["Sygnał prostokątny", "Sygnał trójkątny"]
+        show_duty = signal_type in ["Sygnał prostokątny", "Sygnał trójkątny", "Sygnał prostokątny symetryczny"]
         self.label_duty.setVisible(show_duty)
         self.spin_duty.setVisible(show_duty)
 
