@@ -59,7 +59,7 @@ class SignalGeneratorApp(QWidget):
             "Sygnał prostokątny", "Sygnał trójkątny"
         ])
         # A
-        self.label_amp = QLabel("Amplituda:")
+        self.label_amp = QLabel("Amplituda (A):")
         self.spin_amp = QDoubleSpinBox()
         self.spin_amp.setRange(0.001, 100.0)
         self.spin_amp.setSingleStep(0.1)
@@ -67,7 +67,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_amp.setValue(0.1)
 
         # d
-        self.label_duration = QLabel("Czas trwania:")
+        self.label_duration = QLabel("Czas trwania (d):")
         self.spin_duration = QDoubleSpinBox()
         self.spin_duration.setRange(0.001, 100.0)
         self.spin_duration.setSingleStep(0.1)
@@ -75,7 +75,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_duration.setValue(1)
 
         # t1
-        self.label_start_time = QLabel("Czas początkowy:")
+        self.label_start_time = QLabel("Czas początkowy (t1):")
         self.spin_start_time = QDoubleSpinBox()
         self.spin_start_time.setRange(0.001, 100.0)
         self.spin_start_time.setSingleStep(0.1)
@@ -83,12 +83,19 @@ class SignalGeneratorApp(QWidget):
         self.spin_start_time.setValue(0)
 
         # T
-        self.label_period = QLabel("Okres podstawowy:")
+        self.label_period = QLabel("Okres podstawowy (T):")
         self.spin_period = QSpinBox()
         self.spin_period.setRange(1, 100)
         self.spin_period.setSingleStep(1)
         self.spin_period.setValue(5)
 
+        # k_w
+        self.label_duty = QLabel("Współczynnik wypełnienia (k_w):")
+        self.spin_duty = QDoubleSpinBox()
+        self.spin_duty.setRange(0.01, 1.0)
+        self.spin_duty.setSingleStep(0.05)
+        self.spin_duty.setDecimals(2)
+        self.spin_duty.setValue(0.5)
 
         # Przycisk generacji
         self.btn_generate = QPushButton("Generuj sygnał")
@@ -122,6 +129,8 @@ class SignalGeneratorApp(QWidget):
         left_layout.addWidget(self.spin_start_time)
         left_layout.addWidget(self.label_period)
         left_layout.addWidget(self.spin_period)
+        left_layout.addWidget(self.label_duty)
+        left_layout.addWidget(self.spin_duty)
         left_layout.addWidget(self.btn_generate)
         left_layout.addWidget(self.btn_load)
         left_layout.addWidget(self.btn_save)
