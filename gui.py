@@ -81,7 +81,10 @@ class SignalGeneratorApp(QWidget):
         self.combo_signal = QComboBox()
         self.combo_signal.addItems([
             "Szum jednostajny", "Szum gaussowski", "Sygnał sinusoidalny",
-            "Sygnał prostokątny", "Sygnał trójkątny"
+            "Sygnał sinusoidalny wyprostowany jednopołówkowo",
+            "Sygnał sinusoidalny wyprostowany dwupołówkowo",
+            "Sygnał prostokątny","Sygnał prostokątny symetryczny", "Sygnał trójkątny",
+            "Skok jednostkowy", "Impuls jednostkowy", "Szum impulsowy"
         ])
 
         self.label_signal_type = QLabel("Typ sygnału:")
@@ -94,7 +97,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_amp.setRange(0.001, 100.0)
         self.spin_amp.setSingleStep(0.1)
         self.spin_amp.setDecimals(3)
-        self.spin_amp.setValue(0.1)
+        self.spin_amp.setValue(5)
 
         # d
         self.label_duration = QLabel("Czas trwania (d):")
@@ -102,7 +105,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_duration.setRange(0.001, 100.0)
         self.spin_duration.setSingleStep(0.1)
         self.spin_duration.setDecimals(3)
-        self.spin_duration.setValue(1)
+        self.spin_duration.setValue(3)
 
         # t1
         self.label_start_time = QLabel("Czas początkowy (t1):")
@@ -130,10 +133,18 @@ class SignalGeneratorApp(QWidget):
         # T_s
         self.label_sampling = QLabel("Okres próbkowania (T_s):")
         self.spin_sampling = QDoubleSpinBox()
-        self.spin_sampling.setRange(0.001, 10.0)
+        self.spin_sampling.setRange(0.001, 100.0)
         self.spin_sampling.setSingleStep(0.001)
         self.spin_sampling.setDecimals(4)
         self.spin_sampling.setValue(0.01)
+
+        # jump_time
+        self.label_jump_time = QLabel("Okres próbkowania (T_s):")
+        self.spin_jump_time = QDoubleSpinBox()
+        self.spin_jump_time.setRange(0.001, 100.0)
+        self.spin_jump_time.setSingleStep(0.001)
+        self.spin_jump_time.setDecimals(4)
+        self.spin_jump_time.setValue(0.01)
 
         # Przycisk generacji
         self.btn_generate = QPushButton("Generuj sygnał")
@@ -213,6 +224,12 @@ class SignalGeneratorApp(QWidget):
         self.sampling_row.addWidget(self.spin_sampling)
         left_layout.addLayout(self.sampling_row)
 
+        # Row 6 - jumping only
+        self.jump_time_row = QHBoxLayout()
+        self.jump_time_row.addWidget(self.label_jump_time)
+        self.jump_time_row.addWidget(self.spin_jump_time)
+        left_layout.addLayout(self.jump_time_row)
+
         row_bins = QHBoxLayout()
         row_bins.addWidget(self.label_bins)
         row_bins.addWidget(self.slider_bins)
@@ -233,13 +250,14 @@ class SignalGeneratorApp(QWidget):
         # Update visibility connections
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_signal_type)
         self.combo_signal_type.currentTextChanged.connect(self.update_visibility_by_sampling_type)
+        self.combo_signal.currentTextChanged.connect(self.update_visibility_by_jumping_type)
 
         self.setLayout(main_layout)
         self.update_visibility_by_signal_type()
         self.update_visibility_by_sampling_type()
 
 
-    def generate_signal(self):
+    def generate_signal_test(self):
         #only for testing
         try:
             signal_type = self.combo_signal.currentText()
@@ -272,7 +290,7 @@ class SignalGeneratorApp(QWidget):
             logging.error(f"Błąd podczas generowania sygnału: {e}")
             self.show_error_message("Błąd generowania sygnału", str(e))
 
-    def generate_signal1(self):
+    def generate_signal(self):
         try:
 
             signal_type = self.combo_signal.currentText()
@@ -283,18 +301,22 @@ class SignalGeneratorApp(QWidget):
             duty_cycle = self.spin_duty.value()
             start_time = self.spin_start_time.value()
             period = self.spin_period.value()
+            jump_time = self.spin_jump_time.value()
+
+            signal_list = []
+            sampling_list = []
 
             if signal_type == "Szum jednostajny":
                 if sampling_type == "Dyskretny":
-                    pass
+                    signal_list, sampling_list = signal_generator.uniform_dist_noise(amplitude, start_time, duration, sampling_value)
                 else:
-                    pass
+                    signal_generator.uniform_dist_noise(amplitude, start_time, duration)
 
             elif signal_type == "Szum gaussowski":
                 if sampling_type == "Dyskretny":
-                    pass
+                    signal_generator.gauss_noise(amplitude, start_time, duration, sampling_value)
                 else:
-                    pass
+                    signal_generator.gauss_noise(amplitude, start_time, duration)
 
             elif signal_type == "Sygnał sinusoidalny":
                 if sampling_type == "Dyskretny":
@@ -304,24 +326,61 @@ class SignalGeneratorApp(QWidget):
 
             elif signal_type == "Sygnał sinusoidalny":
                 if sampling_type == "Dyskretny":
-                    pass
+                    signal_generator.sinus(amplitude, period, start_time, duration, sampling_value)
                 else:
-                    pass
+                    signal_generator.sinus(amplitude, period, start_time, duration)
+
+            elif signal_type == "Sygnał sinusoidalny wyprostowany jednopołówkowo":
+                if sampling_type == "Dyskretny":
+                    signal_generator.sinus_abs(amplitude, period, start_time, duration, sampling_value)
+                else:
+                    signal_generator.sinus_abs(amplitude, period, start_time, duration)
+
+            elif signal_type == "Sygnał sinusoidalny wyprostowany dwupołówkowo":
+                if sampling_type == "Dyskretny":
+                    signal_generator.sinus_one_half(amplitude, period, start_time, duration, sampling_value)
+                else:
+                    signal_generator.sinus_one_half(amplitude, period, start_time, duration)
 
             elif signal_type == "Sygnał prostokątny":
                 if sampling_type == "Dyskretny":
-                    pass
+                    signal_generator.square_classic(amplitude, period, start_time, duration, duty_cycle, sampling_value)
                 else:
-                    pass
+                    signal_generator.square_classic(amplitude, period, start_time, duration, duty_cycle)
+
+            elif signal_type == "Sygnał prostokątny symetryczny":
+                if sampling_type == "Dyskretny":
+                    signal_generator.square_simetric(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                else:
+                    signal_generator.square_simetric(amplitude, period, start_time, duration, duty_cycle)
 
             elif signal_type == "Sygnał trójkątny":
+                if sampling_type == "Dyskretny":
+                    signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                else:
+                    signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+
+            elif signal_type == "Skok jednostkowy":
+                if sampling_type == "Dyskretny":
+                    signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
+                else:
+                    signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
+
+            elif signal_type == "Impuls jednostkowy":
                 if sampling_type == "Dyskretny":
                     pass
                 else:
                     pass
 
+            elif signal_type == "Szum impulsowy":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
             else:
                 raise Exception("There is no such signal type! ({}).".format(signal_type))
+
+            print(signal_list, sampling_list)
         except Exception as e:
             logging.error(f"Błąd podczas generowania sygnału: {e}")
             self.show_error_message("Błąd generowania sygnału", str(e))
@@ -382,6 +441,12 @@ class SignalGeneratorApp(QWidget):
         show_sampling = sampling_type == "Dyskretny"
         self.label_sampling.setVisible(show_sampling)
         self.spin_sampling.setVisible(show_sampling)
+
+    def update_visibility_by_jumping_type(self):
+        signal_type = self.combo_signal.currentText()
+        show_jump = signal_type in ["Skok jednostkowy"]
+        self.label_jump_time.setVisible(show_jump)
+        self.spin_jump_time.setVisible(show_jump)
 
     def on_bin_slider_changed(self, value):
         self.label_bins_value.setText(str(value))
