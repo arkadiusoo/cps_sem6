@@ -51,13 +51,18 @@ class SignalGeneratorApp(QWidget):
         y = screen_geometry.y() + (screen_geometry.height() - height) // 2
         self.move(x, y)
 
-        # Wybór sygnału
+
         self.label_signal = QLabel("Wybierz sygnał:")
         self.combo_signal = QComboBox()
         self.combo_signal.addItems([
             "Szum jednostajny", "Szum gaussowski", "Sygnał sinusoidalny",
             "Sygnał prostokątny", "Sygnał trójkątny"
         ])
+
+        self.label_signal_type = QLabel("Typ sygnału:")
+        self.combo_signal_type = QComboBox()
+        self.combo_signal_type.addItems(["Ciągły", "Dyskretny"])
+
         # A
         self.label_amp = QLabel("Amplituda (A):")
         self.spin_amp = QDoubleSpinBox()
@@ -89,13 +94,21 @@ class SignalGeneratorApp(QWidget):
         self.spin_period.setSingleStep(1)
         self.spin_period.setValue(5)
 
-        # k_w
+        # kw
         self.label_duty = QLabel("Współczynnik wypełnienia (k_w):")
         self.spin_duty = QDoubleSpinBox()
         self.spin_duty.setRange(0.01, 1.0)
         self.spin_duty.setSingleStep(0.05)
         self.spin_duty.setDecimals(2)
         self.spin_duty.setValue(0.5)
+
+        # T_s
+        self.label_sampling = QLabel("Okres próbkowania (T_s):")
+        self.spin_sampling = QDoubleSpinBox()
+        self.spin_sampling.setRange(0.001, 10.0)
+        self.spin_sampling.setSingleStep(0.001)
+        self.spin_sampling.setDecimals(4)
+        self.spin_sampling.setValue(0.01)
 
         # Przycisk generacji
         self.btn_generate = QPushButton("Generuj sygnał")
@@ -121,6 +134,8 @@ class SignalGeneratorApp(QWidget):
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.label_signal)
         left_layout.addWidget(self.combo_signal)
+        left_layout.addWidget(self.label_signal_type)
+        left_layout.addWidget(self.combo_signal_type)
         left_layout.addWidget(self.label_amp)
         left_layout.addWidget(self.spin_amp)
         left_layout.addWidget(self.label_duration)
@@ -131,6 +146,8 @@ class SignalGeneratorApp(QWidget):
         left_layout.addWidget(self.spin_period)
         left_layout.addWidget(self.label_duty)
         left_layout.addWidget(self.spin_duty)
+        left_layout.addWidget(self.label_sampling)
+        left_layout.addWidget(self.spin_sampling)
         left_layout.addWidget(self.btn_generate)
         left_layout.addWidget(self.btn_load)
         left_layout.addWidget(self.btn_save)
