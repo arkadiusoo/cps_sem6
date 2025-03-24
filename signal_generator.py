@@ -14,24 +14,32 @@ def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
-            if j % 3 ==0:
+            if j % 3 == 0:
                 user_noise.append([value, i])
-                j=0
+                j = 0
         else:
             sample_rate += 1/1000
     return noise, user_noise
 
 
-def gauss_noise(amplitude, start, duration, sample_rate=1000):
+def gauss_noise(amplitude, start, duration, sample_rate=None):
     noise = []
+    user_noise = []
     i = 0
+    j = 0
     while i < duration:
         value = 0
         if i > start:
             value = np.random.normal(0, amplitude)
-        noise.append([value, i])
-        i += 1 / sample_rate
-    return noise
+        if sample_rate is not None:
+            i += 1 / (3 * sample_rate)
+            j += 1
+            if j % 3 == 0:
+                user_noise.append([value, i])
+                j = 0
+        else:
+            sample_rate += 1 / 1000
+    return noise, user_noise
 
 
 def sinus(amplitude, period, start, duration, sample_rate=1000):
