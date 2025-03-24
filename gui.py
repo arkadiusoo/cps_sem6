@@ -239,25 +239,6 @@ class SignalGeneratorApp(QWidget):
         self.update_visibility_by_sampling_type()
 
 
-
-    # def generate_signal(self):
-    #     try:
-    #         signal_type = self.combo_signal.currentText()
-    #         amplitude = self.spin_amp.value()
-    #         duration = self.spin_duration.value()
-    #
-    #         self.current_signal, time = signal_generator.generate_signal(
-    #             signal_type, amplitude, duration)
-    #
-    #         self.plot_canvas.plot(time, self.current_signal, signal_type)
-    #
-    #         signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
-    #         self.signals_list.append((time, self.current_signal, signal_info))
-    #         self.list_signals.addItem(signal_info)
-    #
-    #     except Exception as e:
-    #         logging.error(f"Błąd podczas generowania sygnału: {e}")
-    #         self.show_error_message("Błąd generowania sygnału", str(e))
     def generate_signal(self):
         #only for testing
         try:
