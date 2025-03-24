@@ -18,7 +18,7 @@ def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
                 user_noise.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return noise, user_noise
 
 
@@ -38,7 +38,7 @@ def gauss_noise(amplitude, start, duration, sample_rate=None):
                 user_noise.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return noise, user_noise
 
 
@@ -59,7 +59,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
                 user_sinus.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return sinus, user_sinus
 
 
@@ -80,7 +80,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
                 user_sinus.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return sinus, user_sinus
 
 
@@ -105,7 +105,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
                 user_sinus.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return sinus, user_sinus
 
 
@@ -131,7 +131,7 @@ def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
                 user_square.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return square, user_square
 
 
@@ -158,7 +158,7 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
                 user_square.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return square, user_square
 
 
@@ -172,11 +172,11 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
         value = 0
         if i > start:
             value = (-amplitude / (period * (1 - kw))) * (
-                        i - k * period - start) + (amplitude / (1 - kw))
+                    i - k * period - start) + (amplitude / (1 - kw))
             if (k * period + start <= i
                     < kw * period + k * period + start):
                 value = (amplitude / (kw * period)) * (
-                            i - (k * period) - start)
+                        i - (k * period) - start)
             if i % (2 * kw) == 0:
                 k += 1
             triangle.append([value, i])
@@ -187,7 +187,7 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
                 user_triangle.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return triangle, user_triangle
 
 
@@ -200,7 +200,7 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
         value = 0
         if i > start:
             if i == jump_time:
-                value = amplitude/2
+                value = amplitude / 2
             else:
                 value = amplitude
 
@@ -212,5 +212,22 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
                 user_jump.append([value, i])
                 j = 0
         else:
-            sample_rate += 1 / 1000
+            i += 1 / 1000
     return jump, user_jump
+
+
+# discrete functions
+# n1 is the probe id from witch we are counting up till ns
+
+
+def one_timer(amplitude, start, ns, duration, sample_rate):
+    jump = []
+    i = 0
+    while i < duration:
+        value = 0
+        if i > start:
+            if i == ns:
+                value = amplitude
+            jump.append([value, i])
+        i += 1 / 1000
+    return jump
