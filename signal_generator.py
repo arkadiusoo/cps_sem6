@@ -16,4 +16,4 @@ def sinus(amplitude, period, start, duration, sample_rate=1000):
     sinus = []
     for i in range(len(time)):
         sinus.append(amplitude * np.sin(((2 * np.pi)/period)*(i-start)))
-    return sinus
+    return sinus, time
