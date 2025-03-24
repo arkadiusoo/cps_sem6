@@ -95,7 +95,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_period.setValue(5)
 
         # kw
-        self.label_duty = QLabel("Współczynnik wypełnienia (k_w):")
+        self.label_duty = QLabel("Współ. wypełnienia (k_w):")
         self.spin_duty = QDoubleSpinBox()
         self.spin_duty.setRange(0.01, 1.0)
         self.spin_duty.setSingleStep(0.05)
@@ -130,24 +130,41 @@ class SignalGeneratorApp(QWidget):
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
 
-        # layouts
         left_layout = QVBoxLayout()
-        left_layout.addWidget(self.label_signal)
-        left_layout.addWidget(self.combo_signal)
-        left_layout.addWidget(self.label_signal_type)
-        left_layout.addWidget(self.combo_signal_type)
-        left_layout.addWidget(self.label_amp)
-        left_layout.addWidget(self.spin_amp)
-        left_layout.addWidget(self.label_duration)
-        left_layout.addWidget(self.spin_duration)
-        left_layout.addWidget(self.label_start_time)
-        left_layout.addWidget(self.spin_start_time)
-        left_layout.addWidget(self.label_period)
-        left_layout.addWidget(self.spin_period)
-        left_layout.addWidget(self.label_duty)
-        left_layout.addWidget(self.spin_duty)
-        left_layout.addWidget(self.label_sampling)
-        left_layout.addWidget(self.spin_sampling)
+
+        # Row 1
+        row1 = QHBoxLayout()
+        row1.addWidget(self.label_signal)
+        row1.addWidget(self.combo_signal)
+        row1.addWidget(self.label_signal_type)
+        row1.addWidget(self.combo_signal_type)
+        left_layout.addLayout(row1)
+
+        # Row 2
+        row2 = QHBoxLayout()
+        row2.addWidget(self.label_amp)
+        row2.addWidget(self.spin_amp)
+        row2.addWidget(self.label_duration)
+        row2.addWidget(self.spin_duration)
+        left_layout.addLayout(row2)
+
+        # Row 3
+        row3 = QHBoxLayout()
+        row3.addWidget(self.label_start_time)
+        row3.addWidget(self.spin_start_time)
+        row3.addWidget(self.label_period)
+        row3.addWidget(self.spin_period)
+        left_layout.addLayout(row3)
+
+        # Row 4
+        row4 = QHBoxLayout()
+        row4.addWidget(self.label_duty)
+        row4.addWidget(self.spin_duty)
+        row4.addWidget(self.label_sampling)
+        row4.addWidget(self.spin_sampling)
+        left_layout.addLayout(row4)
+
+        # Buttons & plot
         left_layout.addWidget(self.btn_generate)
         left_layout.addWidget(self.btn_load)
         left_layout.addWidget(self.btn_save)
