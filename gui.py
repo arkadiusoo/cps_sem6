@@ -186,21 +186,74 @@ class SignalGeneratorApp(QWidget):
         self.update_visibility_by_signal_type()
         self.update_visibility_by_sampling_type()
 
+    # def generate_signal(self):
+    #     try:
+    #         signal_type = self.combo_signal.currentText()
+    #         amplitude = self.spin_amp.value()
+    #         duration = self.spin_duration.value()
+    #
+    #         self.current_signal, time = signal_generator.generate_signal(
+    #             signal_type, amplitude, duration)
+    #
+    #         self.plot_canvas.plot(time, self.current_signal, signal_type)
+    #
+    #         signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
+    #         self.signals_list.append((time, self.current_signal, signal_info))
+    #         self.list_signals.addItem(signal_info)
+    #
+    #     except Exception as e:
+    #         logging.error(f"Błąd podczas generowania sygnału: {e}")
+    #         self.show_error_message("Błąd generowania sygnału", str(e))
     def generate_signal(self):
         try:
+
             signal_type = self.combo_signal.currentText()
             amplitude = self.spin_amp.value()
             duration = self.spin_duration.value()
+            sampling_type = self.combo_signal_type.currentText()
+            sampling_value = self.spin_sampling.value()
+            duty_cycle = self.spin_duty.value()
+            start_time = self.spin_start_time.value()
+            period = self.spin_period.value()
 
-            self.current_signal, time = signal_generator.generate_signal(
-                signal_type, amplitude, duration)
+            if signal_type == "Szum jednostajny":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
 
-            self.plot_canvas.plot(time, self.current_signal, signal_type)
+            elif signal_type == "Szum gaussowski":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
 
-            signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
-            self.signals_list.append((time, self.current_signal, signal_info))
-            self.list_signals.addItem(signal_info)
+            elif signal_type == "Sygnał sinusoidalny":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
 
+            elif signal_type == "Sygnał sinusoidalny":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
+
+            elif signal_type == "Sygnał prostokątny":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
+
+            elif signal_type == "Sygnał trójkątny":
+                if sampling_type == "Dyskretny":
+                    pass
+                else:
+                    pass
+
+            else:
+                raise Exception("There is no such signal type! ({}).".format(signal_type))
         except Exception as e:
             logging.error(f"Błąd podczas generowania sygnału: {e}")
             self.show_error_message("Błąd generowania sygnału", str(e))
