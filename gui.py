@@ -26,7 +26,7 @@ class MatplotlibCanvas(FigureCanvas):
         self.ax.set_xlabel("Czas")
         self.ax.set_ylabel("Amplituda")
         self.ax.grid()
-        self.ax.legend()
+        # self.ax.legend()
         self.draw()
 
 
