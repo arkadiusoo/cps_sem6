@@ -2,10 +2,11 @@ import numpy as np
 import logging
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox,
-    QSpinBox, QFileDialog, QListWidget, QMessageBox, QDoubleSpinBox
+    QSpinBox, QFileDialog, QListWidget, QMessageBox, QDoubleSpinBox,
+    QSlider
 )
 from PyQt6.QtGui import QGuiApplication
-from PyQt6.QtCore import QRect
+from PyQt6.QtCore import QRect, Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import signal_generator
@@ -153,6 +154,18 @@ class SignalGeneratorApp(QWidget):
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
 
+        self.label_bins = QLabel("Liczba przedziałów (bins):")
+        self.slider_bins = QSlider(Qt.Orientation.Horizontal)
+        self.slider_bins.setMinimum(5)
+        self.slider_bins.setMaximum(20)
+        self.slider_bins.setSingleStep(1)
+        self.slider_bins.setTickInterval(1)
+        self.slider_bins.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.slider_bins.setValue(10)  # Domyślna liczba binów
+
+        self.label_bins_value = QLabel("10")  # Etykieta z aktualną wartością
+        self.slider_bins.valueChanged.connect(self.on_bin_slider_changed)
+
         left_layout = QVBoxLayout()
 
         # Row 1
@@ -191,6 +204,12 @@ class SignalGeneratorApp(QWidget):
         self.sampling_row.addWidget(self.spin_sampling)
         left_layout.addLayout(self.sampling_row)
 
+        row_bins = QHBoxLayout()
+        row_bins.addWidget(self.label_bins)
+        row_bins.addWidget(self.slider_bins)
+        row_bins.addWidget(self.label_bins_value)
+        left_layout.addLayout(row_bins)
+
         # Buttons & plot
         left_layout.addWidget(self.btn_generate)
         left_layout.addWidget(self.btn_load)
@@ -208,6 +227,7 @@ class SignalGeneratorApp(QWidget):
         self.setLayout(main_layout)
         self.update_visibility_by_signal_type()
         self.update_visibility_by_sampling_type()
+
 
     # def generate_signal(self):
     #     try:
@@ -337,3 +357,9 @@ class SignalGeneratorApp(QWidget):
         show_sampling = sampling_type == "Dyskretny"
         self.label_sampling.setVisible(show_sampling)
         self.spin_sampling.setVisible(show_sampling)
+
+    def on_bin_slider_changed(self, value):
+        self.label_bins_value.setText(str(value))
+        if self.current_signal is not None:
+            self.plot_canvas.plot_histogram(self.current_signal, bins=value)
+
