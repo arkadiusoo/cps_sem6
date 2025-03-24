@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.random import random
 
 
 def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
@@ -229,5 +230,24 @@ def one_timer(amplitude, start, ns, duration, sample_rate):
             if i == ns:
                 value = amplitude
             jump.append([value, i])
-        i += 1 / 1000
+        if sample_rate is not None:
+            i += 1 / sample_rate
+        else:
+            i += 1 / 1000
     return jump
+
+
+def impulse_noise(amplitude, start, probability, duration, sample_rate):
+    noise = []
+    i = 0
+    while i < duration:
+        value = 0
+        if i > start:
+            if np.random.uniform(0, 1) < probability:
+                value = amplitude
+            noise.append([value, i])
+        if sample_rate is not None:
+            i += 1 / sample_rate
+        else:
+            i += 1 / 1000
+    return noise
