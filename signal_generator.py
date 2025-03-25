@@ -75,7 +75,8 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
     while i < duration:
         value = 0
         if i > start:
-            value = amplitude * abs(np.sin(((2 * np.pi) / period) * (i - start)))
+            value = amplitude * abs(
+                np.sin(((2 * np.pi) / period) * (i - start)))
             sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -97,7 +98,9 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
     while i < duration:
         value = 0
         if i > start:
-            value = (amplitude * ((np.sin(((2 * np.pi) / period) * (i - start))) +abs((np.sin(((2 * np.pi) / period) * (i - start)))))) / 2
+            value = (amplitude * (
+                    (np.sin(((2 * np.pi) / period) * (i - start))) + abs(
+                (np.sin(((2 * np.pi) / period) * (i - start)))))) / 2
             sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -116,15 +119,11 @@ def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
     user_square = []
     i = 0
     j = 0
-    k = 0
     while i < duration:
         value = 0
         if i > start:
-            if (k * period + start <= i
-                    < kw * period + k * period + start):
+            if (i - start) % period < period * kw:
                 value = amplitude
-            if i % (2 * kw) == 0:
-                k += 1
             square.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -143,16 +142,12 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
     user_square = []
     i = 0
     j = 0
-    k = 0
     while i < duration:
         value = 0
         if i > start:
             value = -amplitude
-            if (k * period + start <= i
-                    < kw * period + k * period + start):
+            if (i - start) % period < period * kw:
                 value = amplitude
-            if i % (2 * kw) == 0:
-                k += 1
             square.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -171,18 +166,16 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
     user_triangle = []
     i = 0
     j = 0
-    k = 0
     while i < duration:
         value = 0
         if i > start:
-            value = (-amplitude / (period * (1 - kw))) * (
-                    i - k * period - start) + (amplitude / (1 - kw))
-            if (k * period + start <= i
-                    < kw * period + k * period + start):
-                value = (amplitude / (kw * period)) * (
-                        i - (k * period) - start)
-            if i % (2 * kw) == 0:
-                k += 1
+            print("lol")
+            phase = (i - start) % period
+            if phase < period * kw:
+                value = (2 * amplitude / (period * kw)) * phase
+            else:
+                value = ((2 * amplitude / (period * (1 - kw))) * (
+                        period - phase))
             triangle.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -192,7 +185,6 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
-    # print(len(triangle), len(user_triangle))
     return triangle, user_triangle
 
 
