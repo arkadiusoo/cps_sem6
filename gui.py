@@ -678,8 +678,8 @@ class SignalGeneratorApp(QWidget):
             i for i in range(self.list_signals.count()) if self.list_signals.item(i).text() == item_text)
 
         # Pobierz dane
-        _, signal1, _, _, _ = self.saved_signals[base_index]
-        _, signal2, _, _, _ = self.saved_signals[second_index]
+        _, signal1, _, _, data = self.saved_signals[base_index]
+        _, signal2, _, _, data2 = self.saved_signals[second_index]
 
         # Zrównaj długości (minimum)
         min_len = min(len(signal1), len(signal2))
@@ -701,9 +701,9 @@ class SignalGeneratorApp(QWidget):
                     result.append([y1 / y2, t1])
 
         # Zaktualizuj interfejs
-        plot_title = f"Operacja ({operation}) [{len(self.saved_signals) + 1}]"
+        plot_title = f"[{len(self.saved_signals) + 1}] Operacja ({data[0]} {operation} {data2[0]})"
         self.list_signals.addItem(plot_title)
-        self.saved_signals.append((plot_title, result, [], "Ciągły", ["Operacja", 0, 0, "Ciągły", 0, 0, 0, 0, 0, 0, 0]))
+        self.saved_signals.append((plot_title, result, [], "Ciągły", ["Operacja", data[1], data[2], "Ciągły", data[4], data[5], data[6], data[7], data[8], data[9], data[10]]))
 
         canvas_func = MatplotlibCanvas(self)
         canvas_func.signal_plot(result, [], signal_type="Ciągły", title=plot_title)
