@@ -146,6 +146,21 @@ class SignalGeneratorApp(QWidget):
         self.spin_jump_time.setDecimals(4)
         self.spin_jump_time.setValue(0.01)
 
+        # ns
+        self.label_ns = QLabel("Numer próbki:")
+        self.spin_ns  = QSpinBox()
+        self.spin_ns.setRange(1, 100)
+        self.spin_ns.setSingleStep(1)
+        self.spin_ns.setValue(5)
+
+        # probability
+        self.label_probability = QLabel("Prawdopodobieństwo:")
+        self.spin_probability = QDoubleSpinBox()
+        self.spin_probability.setRange(0.01, 1.0)
+        self.spin_probability.setSingleStep(0.01)
+        self.spin_probability.setDecimals(2)
+        self.spin_probability.setValue(0.2)
+
         # Przycisk generacji
         self.btn_generate = QPushButton("Generuj sygnał")
         self.btn_generate.clicked.connect(self.generate_signal)
@@ -230,6 +245,17 @@ class SignalGeneratorApp(QWidget):
         self.jump_time_row.addWidget(self.spin_jump_time)
         left_layout.addLayout(self.jump_time_row)
 
+        # Row 7 - ns only
+        self.ns_row = QHBoxLayout()
+        self.ns_row.addWidget(self.label_ns)
+        self.ns_row.addWidget(self.spin_ns)
+        left_layout.addLayout(self.ns_row)
+        # Row 8 - probability
+        self.probability_row = QHBoxLayout()
+        self.probability_row.addWidget(self.label_probability)
+        self.probability_row.addWidget(self.spin_probability)
+        left_layout.addLayout(self.probability_row)
+
         row_bins = QHBoxLayout()
         row_bins.addWidget(self.label_bins)
         row_bins.addWidget(self.slider_bins)
@@ -251,6 +277,8 @@ class SignalGeneratorApp(QWidget):
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_signal_type)
         self.combo_signal_type.currentTextChanged.connect(self.update_visibility_by_sampling_type)
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_jumping_type)
+        self.combo_signal.currentTextChanged.connect(self.update_visibility_by_ns_type)
+        self.combo_signal.currentTextChanged.connect(self.update_visibility_by_probability_type)
 
         self.setLayout(main_layout)
         self.update_visibility_by_signal_type()
@@ -268,6 +296,8 @@ class SignalGeneratorApp(QWidget):
             start_time = self.spin_start_time.value()
             period = self.spin_period.value()
             jump_time = self.spin_jump_time.value()
+            ns = self.spin_ns.value()
+            probability = self.spin_probability.value()
 
             signal_list = []
             sampling_list = []
@@ -324,25 +354,25 @@ class SignalGeneratorApp(QWidget):
                 if sampling_type == "Dyskretny":
                     signal_list, sampling_list = signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
                 else:
-                    signal_list, sampling_list = signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle, sampling_value)
+                    signal_list, sampling_list = signal_generator.triangular(amplitude, period, start_time, duration, duty_cycle)
 
             elif signal_type == "Skok jednostkowy":
                 if sampling_type == "Dyskretny":
                     signal_list, sampling_list = signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
                 else:
-                    signal_list, sampling_list = signal_generator.jump_signal(amplitude, start_time, duration, jump_time, sampling_value)
+                    signal_list, sampling_list = signal_generator.jump_signal(amplitude, start_time, duration, jump_time)
 
             elif signal_type == "Impuls jednostkowy":
                 if sampling_type == "Dyskretny":
-                    pass
+                    signal_list, sampling_list = signal_generator.one_timer(amplitude, start_time, ns, duration, sampling_value)
                 else:
-                    pass
+                    signal_list, sampling_list = signal_generator.one_timer(amplitude, start_time, ns, duration, sampling_value)
 
             elif signal_type == "Szum impulsowy":
                 if sampling_type == "Dyskretny":
-                    pass
+                    signal_list, sampling_list = signal_generator.impulse_noise(amplitude, start_time, probability, duration, sampling_value)
                 else:
-                    pass
+                    signal_list, sampling_list = signal_generator.impulse_noise(amplitude, start_time, probability, duration, sampling_value)
             else:
                 raise Exception("There is no such signal type! ({}).".format(signal_type))
             # print("to co dostaje w gui")
@@ -414,6 +444,18 @@ class SignalGeneratorApp(QWidget):
         show_jump = signal_type in ["Skok jednostkowy"]
         self.label_jump_time.setVisible(show_jump)
         self.spin_jump_time.setVisible(show_jump)
+
+    def update_visibility_by_ns_type(self):
+        signal_type = self.combo_signal.currentText()
+        show_ns = signal_type in ["Impuls jednostkowy"]
+        self.label_ns.setVisible(show_ns)
+        self.spin_ns.setVisible(show_ns)
+
+    def update_visibility_by_probability_type(self):
+        signal_type = self.combo_signal.currentText()
+        show_probability = signal_type in ["Szum impulsowy"]
+        self.label_probability.setVisible(show_probability)
+        self.spin_probability.setVisible(show_probability)
 
     def on_bin_slider_changed(self, value):
         self.label_bins_value.setText(str(value))
