@@ -15,11 +15,12 @@ import file_manager
 
 class MatplotlibCanvas(FigureCanvas):
     def __init__(self, parent=None):
-        self.fig = Figure(figsize=(5, 3))  # domyślny rozmiar figury
+        self.fig = Figure(figsize=(5, 4))
         self.ax = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
-        self.setMinimumHeight(300)  # <<< to ustawia minimum na wysokość
+        self.setMinimumHeight(300)
+        self.saved_signals = []
 
     def signal_plot(self, continuous_data, sampled_data, signal_type="Ciągły", title="Wykres sygnału"):
         self.ax.clear()
@@ -65,7 +66,7 @@ class SignalGeneratorApp(QWidget):
     def __init__(self):
         super().__init__()
         self.current_signal = None
-        self.signals_list = []  # Lista przechowywanych sygnałów
+        self.saved_signals = []
         self.init_ui()
 
     def init_ui(self):
@@ -406,6 +407,16 @@ class SignalGeneratorApp(QWidget):
             canvas_hist.plot_histogram(y, bins=self.slider_bins.value(), title="Histogram amplitudy")
             self.scroll_layout.addWidget(canvas_hist)
 
+            # Dodaj do historii
+            info = f"{signal_type} | {sampling_type} | A: {amplitude}, T: {duration}s"
+            self.list_signals.addItem(info)
+            self.saved_signals.append((info, signal_list, sampling_list, sampling_type))
+
+            # Zapisz ostatni sygnał do histogramu (dla slidera binów)
+            self.current_signal = [i[0] for i in signal_list]
+            self.last_hist_canvas = canvas_hist
+
+
         except Exception as e:
             logging.error(f"Błąd podczas generowania sygnału: {e}")
             self.show_error_message("Błąd generowania sygnału", str(e))
@@ -445,8 +456,26 @@ class SignalGeneratorApp(QWidget):
 
     def display_selected_signal(self, item):
         index = self.list_signals.row(item)
-        time, signal, signal_info = self.signals_list[index]
-        # self.plot_canvas.signal_plot(time, signal, signal_info)
+        info, signal_list, sampling_list, sampling_type = self.saved_signals[index]
+
+        # Wyczyść poprzednie wykresy
+        for i in reversed(range(self.scroll_layout.count())):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        # Stwórz i dodaj nowe płótno
+        canvas_func = MatplotlibCanvas(self)
+        canvas_func.signal_plot(signal_list, sampling_list, signal_type=sampling_type, title="Wykres funkcji")
+        self.scroll_layout.addWidget(canvas_func)
+
+        canvas_hist = MatplotlibCanvas(self)
+        y = [i[0] for i in signal_list]
+        canvas_hist.plot_histogram(y, bins=self.slider_bins.value(), title="Histogram amplitudy")
+        self.scroll_layout.addWidget(canvas_hist)
+
+        self.current_signal = y
+        self.last_hist_canvas = canvas_hist
 
     def show_error_message(self, title, message):
         msg = QMessageBox(self)
