@@ -589,20 +589,30 @@ class SignalGeneratorApp(QWidget):
         index = self.list_signals.row(item)
         info, signal_list, sampling_list, sampling_type, data = self.saved_signals[index]
 
-        # Używamy tylko sampling_list (bo to dane dyskretne)
         start = data[6]  # start_time
-        end = start + data[2]  # start + duration
+        end = start + data[2]  # start_time + duration
 
         try:
-            mean_val = properties.mean_value_discreate(start, end, sampling_list)
-            abs_mean_val = properties.absolute_mean_value_discreate(start, end, sampling_list)
-            mean_power = properties.mean_power_discreate(start, end, sampling_list)
-            variation = properties.variation_discreate(start, end, sampling_list)
-            effective = properties.effective_value_discreate(start, end, sampling_list)
+            if sampling_type == "Dyskretny":
+                mean_val = properties.mean_value_discreate(start, end, sampling_list)
+                abs_mean_val = properties.absolute_mean_value_discreate(start, end, sampling_list)
+                mean_power = properties.mean_power_discreate(start, end, sampling_list)
+                variation = properties.variation_discreate(start, end, sampling_list)
+                effective = properties.effective_value_discreate(start, end, sampling_list)
+
+                label = "Właściwości sygnału dyskretnego"
+            else:
+                mean_val = properties.mean_value_continues(start, end, signal_list)
+                abs_mean_val = properties.absolute_mean_value_continues(start, end, signal_list)
+                mean_power = properties.mean_power_continues(start, end, signal_list)
+                variation = properties.variation_continues(start, end, signal_list)
+                effective = properties.effective_value(start, end, signal_list)
+
+                label = "Właściwości sygnału ciągłego"
 
             summary = (
                 f"<b>Informacje o sygnale {info}:</b><br><br>"
-                f"<b>Właściwości sygnału:</b><br><br>"
+                f"<b>{label}:</b><br><br>"
                 f"<b>Średnia:</b> {mean_val:.4f}<br>"
                 f"<b>Średnia wartość bezwzględna:</b> {abs_mean_val:.4f}<br>"
                 f"<b>Moc średnia:</b> {mean_power:.4f}<br>"
@@ -616,10 +626,9 @@ class SignalGeneratorApp(QWidget):
             msg.setTextFormat(Qt.TextFormat.RichText)
             msg.setText(summary)
             msg.exec()
+
         except Exception as e:
             self.show_error_message("Błąd właściwości sygnału", str(e))
-
-    from PyQt6.QtWidgets import QMenu
 
     def show_context_menu(self, position):
         index = self.list_signals.indexAt(position).row()
