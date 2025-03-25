@@ -53,8 +53,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
     while i < duration:
         value = 0
         if i > start:
-            value = sinus.append(
-                amplitude * np.sin(((2 * np.pi) / period) * (i - start)))
+            value = amplitude * np.sin(((2 * np.pi) / period) * (i - start))
             sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -76,8 +75,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
     while i < duration:
         value = 0
         if i > start:
-            sinus.append(
-                amplitude * abs(np.sin(((2 * np.pi) / period) * (i - start))))
+            value = amplitude * abs(np.sin(((2 * np.pi) / period) * (i - start)))
             sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
@@ -99,12 +97,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
     while i < duration:
         value = 0
         if i > start:
-            sinus.append(
-                (amplitude * (
-                        (np.sin(((2 * np.sin) / period) * (i - start))) +
-                        abs((np.sin(
-                            ((2 * np.sin) / period) * (
-                                    i - start)))))) / 2)
+            value = (amplitude * ((np.sin(((2 * np.pi) / period) * (i - start))) +abs((np.sin(((2 * np.pi) / period) * (i - start)))))) / 2
             sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)

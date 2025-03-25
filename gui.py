@@ -47,6 +47,7 @@ class MatplotlibCanvas(FigureCanvas):
         self.ax.set_ylabel("Amplituda")
         self.ax.grid()
         # self.ax.legend()
+        self.fig.tight_layout()
         self.draw()
 
     def plot_histogram(self, values, bins=10, title="Histogram amplitudy"):
@@ -59,6 +60,7 @@ class MatplotlibCanvas(FigureCanvas):
         self.ax.set_xlabel("Amplituda")
         self.ax.set_ylabel("Liczba wystąpień")
         self.ax.grid()
+        self.fig.tight_layout()
         self.draw()
 
 
@@ -334,12 +336,6 @@ class SignalGeneratorApp(QWidget):
 
             elif signal_type == "Sygnał sinusoidalny":
                 if sampling_type == "Dyskretny":
-                    pass
-                else:
-                    pass
-
-            elif signal_type == "Sygnał sinusoidalny":
-                if sampling_type == "Dyskretny":
                     signal_list, sampling_list = signal_generator.sinus(amplitude, period, start_time, duration, sampling_value)
                 else:
                     signal_list, sampling_list = signal_generator.sinus(amplitude, period, start_time, duration)
@@ -354,7 +350,7 @@ class SignalGeneratorApp(QWidget):
                 if sampling_type == "Dyskretny":
                     signal_list, sampling_list = signal_generator.sinus_one_half(amplitude, period, start_time, duration, sampling_value)
                 else:
-                    signal_generator.sinus_one_half(amplitude, period, start_time, duration)
+                    signal_list, sampling_list = signal_generator.sinus_one_half(amplitude, period, start_time, duration)
 
             elif signal_type == "Sygnał prostokątny":
                 if sampling_type == "Dyskretny":
