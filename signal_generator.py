@@ -195,13 +195,12 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
     j = 0
     while i < duration:
         value = 0
-        if i > start:
-            if i == jump_time:
-                value = amplitude / 2
-            else:
-                value = amplitude
+        if i == jump_time:
+            value = amplitude / 2
+        elif i > jump_time:
+            value = amplitude
 
-            jump.append([value, i])
+        jump.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
