@@ -440,17 +440,25 @@ class SignalGeneratorApp(QWidget):
 
     def save_signal(self):
         try:
-            if self.current_signal is not None:
+            if self.saved_signals:
+                index = self.list_signals.currentRow()
+                if index == -1:
+                    raise ValueError("Nie wybrano sygnału do zapisania.")
+
+                info, signal_list, sampling_list, sampling_type, parameters = self.saved_signals[index]
+
                 file_name, _ = QFileDialog.getSaveFileName(
                     self, "Zapisz plik", "", "Pliki binarne (*.bin)")
                 if file_name:
-                    signal_type = self.combo_signal.currentText()
-                    amplitude = self.spin_amp.value()
-                    duration = self.spin_duration.value()
                     file_manager.save_signal(
-                        file_name, self.current_signal, signal_type, amplitude, duration)
+                        file_name,
+                        signal_list,
+                        sampling_list,
+                        sampling_type,
+                        parameters
+                    )
             else:
-                raise ValueError("Najpierw wygeneruj sygnał!")
+                raise ValueError("Brak sygnałów do zapisania.")
         except Exception as e:
             logging.error(f"Błąd zapisu pliku: {e}")
             self.show_error_message("Błąd zapisu pliku", str(e))
@@ -460,13 +468,37 @@ class SignalGeneratorApp(QWidget):
             file_name, _ = QFileDialog.getOpenFileName(
                 self, "Otwórz plik", "", "Pliki binarne (*.bin)")
             if file_name:
-                signal_type, amplitude, duration, signal = file_manager.load_signal(file_name)
-                if signal is not None:
-                    time = np.linspace(0, duration, len(signal))
-                    # self.plot_canvas.signal_plot(time, signal, f"{signal_type} | A: {amplitude}, T: {duration}s")
-                    signal_info = f"{signal_type} | A: {amplitude}, T: {duration}s"
-                    self.signals_list.append((time, signal, signal_info))
-                    self.list_signals.addItem(signal_info)
+                signal_list, sampling_list, sampling_type, parameters = file_manager.load_signal(file_name)
+
+                signal_type = parameters[0]
+                amplitude = parameters[1]
+                duration = parameters[2]
+
+                plot_title = f"[{len(self.saved_signals) + 1}] {signal_type} A: {amplitude} | T: {duration}s"
+
+                # Rysowanie wykresu
+                for i in reversed(range(self.scroll_layout.count())):
+                    widget = self.scroll_layout.itemAt(i).widget()
+                    if widget:
+                        widget.setParent(None)
+
+                canvas_func = MatplotlibCanvas(self)
+                canvas_func.signal_plot(signal_list, sampling_list, signal_type=sampling_type, title=plot_title)
+                self.scroll_layout.addWidget(canvas_func)
+
+                canvas_hist = MatplotlibCanvas(self)
+                y = [i[0] for i in signal_list]
+                canvas_hist.plot_histogram(y, bins=self.slider_bins.value(),
+                                           title=f"Histogram amplitudy dla {plot_title}")
+                self.scroll_layout.addWidget(canvas_hist)
+
+                # Dodanie do listy
+                self.list_signals.addItem(plot_title)
+                self.saved_signals.append((plot_title, signal_list, sampling_list, sampling_type, parameters))
+
+                self.current_signal = y
+                self.last_hist_canvas = canvas_hist
+
         except Exception as e:
             logging.error(f"Błąd odczytu pliku: {e}")
             self.show_error_message("Błąd odczytu pliku", str(e))
@@ -501,9 +533,9 @@ class SignalGeneratorApp(QWidget):
         self.spin_sampling.setValue(data[4])
         self.spin_duty.setValue(data[5])
         self.spin_start_time.setValue(data[6])
-        self.spin_period.setValue(data[7])
+        self.spin_period.setValue(int(data[7]))
         self.spin_jump_time.setValue(data[8])
-        self.spin_ns.setValue(data[9])
+        self.spin_ns.setValue(int(data[9]))
         self.spin_probability.setValue(data[10])
 
     def show_error_message(self, title, message):
