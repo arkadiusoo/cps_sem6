@@ -32,7 +32,7 @@ def gauss_noise(amplitude, start, duration, sample_rate=None):
         value = 0
         if i > start:
             value = np.random.normal(0, amplitude)
-            noise.append([value, i])
+        noise.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -54,7 +54,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
         value = 0
         if i > start:
             value = amplitude * np.sin(((2 * np.pi) / period) * (i - start))
-            sinus.append([value, i])
+        sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -77,7 +77,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
         if i > start:
             value = amplitude * abs(
                 np.sin(((2 * np.pi) / period) * (i - start)))
-            sinus.append([value, i])
+        sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -101,7 +101,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
             value = (amplitude * (
                     (np.sin(((2 * np.pi) / period) * (i - start))) + abs(
                 (np.sin(((2 * np.pi) / period) * (i - start)))))) / 2
-            sinus.append([value, i])
+        sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -124,7 +124,7 @@ def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
         if i > start:
             if (i - start) % period < period * kw:
                 value = amplitude
-            square.append([value, i])
+        square.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -148,7 +148,7 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
             value = -amplitude
             if (i - start) % period < period * kw:
                 value = amplitude
-            square.append([value, i])
+        square.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -169,14 +169,13 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
     while i < duration:
         value = 0
         if i > start:
-            print("lol")
             phase = (i - start) % period
             if phase < period * kw:
                 value = (2 * amplitude / (period * kw)) * phase
             else:
                 value = ((2 * amplitude / (period * (1 - kw))) * (
                         period - phase))
-            triangle.append([value, i])
+        triangle.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
