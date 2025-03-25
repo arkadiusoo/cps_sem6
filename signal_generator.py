@@ -18,7 +18,7 @@ def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
                 user_noise.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(noise), len(user_noise))
     return noise, user_noise
 
@@ -62,7 +62,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
                 user_sinus.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(sinus), len(user_sinus))
     return sinus, user_sinus
 
@@ -85,7 +85,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
                 user_sinus.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(sinus), len(user_sinus))
     return sinus, user_sinus
 
@@ -109,7 +109,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
                 user_sinus.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(sinus), len(user_sinus))
     return sinus, user_sinus
 
@@ -132,7 +132,7 @@ def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
                 user_square.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(square), len(user_square))
     return square, user_square
 
@@ -156,7 +156,7 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
                 user_square.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(square), len(user_square))
     return square, user_square
 
@@ -184,7 +184,7 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
                 user_triangle.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     return triangle, user_triangle
 
 
@@ -208,7 +208,7 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
                 user_jump.append([value, i])
                 j = 0
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(jump), len(user_jump))
     return jump, user_jump
 
@@ -229,7 +229,7 @@ def one_timer(amplitude, start, ns, duration, sample_rate):
         if sample_rate is not None:
             i += 1 / sample_rate
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print(len(jump))
     return jump, []
 
@@ -247,6 +247,6 @@ def impulse_noise(amplitude, start, probability, duration, sample_rate):
         if sample_rate is not None:
             i += 1 / sample_rate
         else:
-            i += 1 / 1000
+            i += 1 / 70
     # print("dlugosc",len(noise))
     return noise, []
