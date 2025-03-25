@@ -25,8 +25,16 @@ class MatplotlibCanvas(FigureCanvas):
         self.ax.clear()
 
         # Unpack data: [time, value]
-        t_cont, y_cont = continuous_data
-        t_samp, y_samp = sampled_data
+        y_cont, t_cont = [], []
+        y_samp, t_samp = [], []
+        for el in continuous_data:
+            y_cont.append(el[0])
+            t_cont.append(el[1])
+        for el in sampled_data:
+            y_samp.append(el[0])
+            t_samp.append(el[1])
+        # y_cont, t_cont = continuous_data
+        # y_samp, t_samp = sampled_data
 
         # Draw original (continuous) function
         self.ax.plot(t_cont, y_cont, label="Funkcja oryginalna", color='blue')
@@ -276,6 +284,7 @@ class SignalGeneratorApp(QWidget):
         # Update visibility connections
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_signal_type)
         self.combo_signal_type.currentTextChanged.connect(self.update_visibility_by_sampling_type)
+        self.combo_signal.currentTextChanged.connect(self.update_visibility_by_sampling_type)
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_jumping_type)
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_ns_type)
         self.combo_signal.currentTextChanged.connect(self.update_visibility_by_probability_type)
@@ -375,8 +384,19 @@ class SignalGeneratorApp(QWidget):
                     signal_list, sampling_list = signal_generator.impulse_noise(amplitude, start_time, probability, duration, sampling_value)
             else:
                 raise Exception("There is no such signal type! ({}).".format(signal_type))
-            # print("to co dostaje w gui")
-            # print(signal_list, sampling_list)
+
+            # signal plot
+            canvas_func = MatplotlibCanvas(self)
+            canvas_func.signal_plot(signal_list, sampling_list, signal_type=signal_type, title="Wykres funkcji")
+            self.scroll_layout.addWidget(canvas_func)
+
+            # Histogram
+            canvas_hist = MatplotlibCanvas(self)
+            y = []
+            for i in signal_list:
+                y.append(i[0])
+            canvas_hist.plot_histogram(y, bins=self.slider_bins.value(), title="Histogram amplitudy")
+            self.scroll_layout.addWidget(canvas_hist)
 
         except Exception as e:
             logging.error(f"Błąd podczas generowania sygnału: {e}")
@@ -435,7 +455,8 @@ class SignalGeneratorApp(QWidget):
 
     def update_visibility_by_sampling_type(self):
         sampling_type = self.combo_signal_type.currentText()
-        show_sampling = sampling_type == "Dyskretny"
+        signal_type = self.combo_signal.currentText()
+        show_sampling = (sampling_type == "Dyskretny") or (signal_type in ["Impuls jednostkowy", "Szum impulsowy"])
         self.label_sampling.setVisible(show_sampling)
         self.spin_sampling.setVisible(show_sampling)
 

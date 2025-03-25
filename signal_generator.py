@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.random import random
 
 
 def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
@@ -20,6 +19,7 @@ def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(noise), len(user_noise))
     return noise, user_noise
 
 
@@ -32,6 +32,7 @@ def gauss_noise(amplitude, start, duration, sample_rate=None):
         value = 0
         if i > start:
             value = np.random.normal(0, amplitude)
+            noise.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -40,6 +41,7 @@ def gauss_noise(amplitude, start, duration, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(noise), len(user_noise))
     return noise, user_noise
 
 
@@ -53,6 +55,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
         if i > start:
             value = sinus.append(
                 amplitude * np.sin(((2 * np.pi) / period) * (i - start)))
+            sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -61,6 +64,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(sinus), len(user_sinus))
     return sinus, user_sinus
 
 
@@ -74,6 +78,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
         if i > start:
             sinus.append(
                 amplitude * abs(np.sin(((2 * np.pi) / period) * (i - start))))
+            sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -82,6 +87,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(sinus), len(user_sinus))
     return sinus, user_sinus
 
 
@@ -99,6 +105,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
                         abs((np.sin(
                             ((2 * np.sin) / period) * (
                                     i - start)))))) / 2)
+            sinus.append([value, i])
         if sample_rate is not None:
             i += 1 / (3 * sample_rate)
             j += 1
@@ -107,6 +114,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(sinus), len(user_sinus))
     return sinus, user_sinus
 
 
@@ -133,6 +141,7 @@ def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(square), len(user_square))
     return square, user_square
 
 
@@ -160,6 +169,7 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(square), len(user_square))
     return square, user_square
 
 
@@ -189,6 +199,7 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(triangle), len(user_triangle))
     return triangle, user_triangle
 
 
@@ -214,6 +225,7 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
                 j = 0
         else:
             i += 1 / 1000
+    # print(len(jump), len(user_jump))
     return jump, user_jump
 
 
@@ -234,7 +246,8 @@ def one_timer(amplitude, start, ns, duration, sample_rate):
             i += 1 / sample_rate
         else:
             i += 1 / 1000
-    return jump
+    # print(len(jump))
+    return jump, []
 
 
 def impulse_noise(amplitude, start, probability, duration, sample_rate):
@@ -243,11 +256,13 @@ def impulse_noise(amplitude, start, probability, duration, sample_rate):
     while i < duration:
         value = 0
         if i > start:
-            if np.random.uniform(0, 1) < probability:
+            random_number = np.random.uniform(0, 1)
+            if random_number < probability:
                 value = amplitude
             noise.append([value, i])
         if sample_rate is not None:
             i += 1 / sample_rate
         else:
             i += 1 / 1000
-    return noise
+    # print("dlugosc",len(noise))
+    return noise, []
