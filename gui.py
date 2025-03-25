@@ -113,7 +113,7 @@ class SignalGeneratorApp(QWidget):
         # d
         self.label_duration = QLabel("Czas trwania (d):")
         self.spin_duration = QDoubleSpinBox()
-        self.spin_duration.setRange(0.001, 100.0)
+        self.spin_duration.setRange(0.000, 100.0)
         self.spin_duration.setSingleStep(0.1)
         self.spin_duration.setDecimals(3)
         self.spin_duration.setValue(3)
@@ -121,17 +121,22 @@ class SignalGeneratorApp(QWidget):
         # t1
         self.label_start_time = QLabel("Czas początkowy (t1):")
         self.spin_start_time = QDoubleSpinBox()
-        self.spin_start_time.setRange(0.001, 100.0)
+        self.spin_start_time.setRange(0.000, 100.0)
         self.spin_start_time.setSingleStep(0.1)
         self.spin_start_time.setDecimals(3)
         self.spin_start_time.setValue(0)
 
         # T
         self.label_period = QLabel("Okres podstawowy (T):")
-        self.spin_period = QSpinBox()
-        self.spin_period.setRange(1, 100)
-        self.spin_period.setSingleStep(1)
-        self.spin_period.setValue(5)
+        # self.spin_period = QSpinBox()
+        # self.spin_period.setRange(1, 100)
+        # self.spin_period.setSingleStep(1)
+        # self.spin_period.setValue(5)
+        self.spin_period = QDoubleSpinBox()
+        self.spin_period.setRange(0.001, 100.0)
+        self.spin_period.setSingleStep(0.1)
+        self.spin_period.setDecimals(3)
+        self.spin_period.setValue(0)
 
         # kw
         self.label_duty = QLabel("Współ. wypełnienia (k_w):")
@@ -142,11 +147,11 @@ class SignalGeneratorApp(QWidget):
         self.spin_duty.setValue(0.5)
 
         # T_s
-        self.label_sampling = QLabel("Okres próbkowania (T_s):")
+        self.label_sampling = QLabel("Okres próbkowania (f_s):")
         self.spin_sampling = QDoubleSpinBox()
-        self.spin_sampling.setRange(0.001, 100.0)
+        self.spin_sampling.setRange(0.000, 10000.0)
         self.spin_sampling.setSingleStep(0.001)
-        self.spin_sampling.setDecimals(4)
+        self.spin_sampling.setDecimals(5)
         self.spin_sampling.setValue(30)
         self.label_sampling.setVisible(False)
         self.spin_sampling.setVisible(False)
