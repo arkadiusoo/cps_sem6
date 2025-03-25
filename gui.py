@@ -3,7 +3,7 @@ import logging
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox,
     QSpinBox, QFileDialog, QListWidget, QMessageBox, QDoubleSpinBox,
-    QSlider, QScrollArea
+    QSlider, QScrollArea, QMenu, QInputDialog
 )
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect, Qt
@@ -208,6 +208,8 @@ class SignalGeneratorApp(QWidget):
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
         self.list_signals.itemDoubleClicked.connect(self.show_signal_properties)
+        self.list_signals.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.list_signals.customContextMenuRequested.connect(self.show_context_menu)
 
         self.label_bins = QLabel("Liczba przedziałów (bins):")
         self.slider_bins = QSlider(Qt.Orientation.Horizontal)
@@ -392,6 +394,8 @@ class SignalGeneratorApp(QWidget):
                 raise Exception("There is no such signal type! ({}).".format(signal_type))
 
             plot_title = "[{}] {} A: {} | T: {}s".format(len(self.saved_signals)+1,signal_type, amplitude, duration)
+            print(plot_title)
+            print("dlugosc sygnalu: {} | dlugosc probkowania: {}".format(len(signal_list), len(sampling_list)))
             # cleaning view
             for i in reversed(range(self.scroll_layout.count())):
                 widget = self.scroll_layout.itemAt(i).widget()
@@ -615,3 +619,89 @@ class SignalGeneratorApp(QWidget):
         except Exception as e:
             self.show_error_message("Błąd właściwości sygnału", str(e))
 
+    from PyQt6.QtWidgets import QMenu
+
+    def show_context_menu(self, position):
+        index = self.list_signals.indexAt(position).row()
+        if index < 0:
+            return
+
+        menu = QMenu(self)
+        add_action = menu.addAction("Dodaj do innego sygnału")
+        sub_action = menu.addAction("Odejmij od innego sygnału")
+        mul_action = menu.addAction("Pomnóż przez inny sygnał")
+        div_action = menu.addAction("Podziel przez inny sygnał")
+
+        action = menu.exec(self.list_signals.mapToGlobal(position))
+
+        if action:
+            operation = None
+            if action == add_action:
+                operation = "add"
+            elif action == sub_action:
+                operation = "sub"
+            elif action == mul_action:
+                operation = "mul"
+            elif action == div_action:
+                operation = "div"
+
+            if operation:
+                self.perform_signal_operation(index, operation)
+
+
+    def perform_signal_operation(self, base_index, operation):
+        # Wyczyść poprzednie wykresy z layoutu
+        for i in reversed(range(self.scroll_layout.count())):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+        # Wybór drugiego sygnału
+        items = [self.list_signals.item(i).text() for i in range(self.list_signals.count()) if i != base_index]
+        if not items:
+            self.show_error_message("Brak sygnałów", "Nie ma drugiego sygnału do wykonania operacji.")
+            return
+
+        item_text, ok = QInputDialog.getItem(self, "Wybierz drugi sygnał", "Drugi sygnał:", items, 0, False)
+        if not ok or not item_text:
+            return
+
+        second_index = next(
+            i for i in range(self.list_signals.count()) if self.list_signals.item(i).text() == item_text)
+
+        # Pobierz dane
+        _, signal1, _, _, _ = self.saved_signals[base_index]
+        _, signal2, _, _, _ = self.saved_signals[second_index]
+
+        # Zrównaj długości (minimum)
+        min_len = min(len(signal1), len(signal2))
+        sig1 = signal1[:min_len]
+        sig2 = signal2[:min_len]
+
+        result = []
+        for (y1, t1), (y2, t2) in zip(sig1, sig2):
+            if operation == "add":
+                result.append([y1 + y2, t1])
+            elif operation == "sub":
+                result.append([y1 - y2, t1])
+            elif operation == "mul":
+                result.append([y1 * y2, t1])
+            elif operation == "div":
+                if y2 == 0:
+                    result.append([0, t1])
+                else:
+                    result.append([y1 / y2, t1])
+
+        # Zaktualizuj interfejs
+        plot_title = f"Operacja ({operation}) [{len(self.saved_signals) + 1}]"
+        self.list_signals.addItem(plot_title)
+        self.saved_signals.append((plot_title, result, [], "Ciągły", ["Operacja", 0, 0, "Ciągły", 0, 0, 0, 0, 0, 0, 0]))
+
+        canvas_func = MatplotlibCanvas(self)
+        canvas_func.signal_plot(result, [], signal_type="Ciągły", title=plot_title)
+        self.scroll_layout.addWidget(canvas_func)
+
+        canvas_hist = MatplotlibCanvas(self)
+        y = [pt[0] for pt in result]
+        canvas_hist.plot_histogram(y, bins=self.slider_bins.value(),
+                                   title="Histogram amplitudy dla {}".format(plot_title))
+        self.scroll_layout.addWidget(canvas_hist)
