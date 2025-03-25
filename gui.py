@@ -9,8 +9,8 @@ from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect, Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import signal_generator
-import file_manager
+import signal_generator, file_manager, properties
+
 
 
 class MatplotlibCanvas(FigureCanvas):
@@ -207,6 +207,7 @@ class SignalGeneratorApp(QWidget):
         self.list_signals = QListWidget()
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
+        self.list_signals.itemDoubleClicked.connect(self.show_signal_properties)
 
         self.label_bins = QLabel("Liczba przedziałów (bins):")
         self.slider_bins = QSlider(Qt.Orientation.Horizontal)
@@ -548,4 +549,37 @@ class SignalGeneratorApp(QWidget):
         if hasattr(self, "last_hist_canvas") and self.current_signal is not None:
             self.last_hist_canvas.plot_histogram(self.current_signal, bins=value)
 
+    def show_signal_properties(self, item):
+        index = self.list_signals.row(item)
+        info, signal_list, sampling_list, sampling_type, data = self.saved_signals[index]
+
+        # Używamy tylko sampling_list (bo to dane dyskretne)
+        start = data[6]  # start_time
+        end = start + data[2]  # start + duration
+
+        try:
+            mean_val = properties.mean_value_discreate(start, end, sampling_list)
+            abs_mean_val = properties.absolute_mean_value_discreate(start, end, sampling_list)
+            mean_power = properties.mean_power_discreate(start, end, sampling_list)
+            variation = properties.variation_discreate(start, end, sampling_list)
+            effective = properties.effective_value_discreate(start, end, sampling_list)
+
+            summary = (
+                f"<b>Informacje o sygnale {info}:</b><br><br>"
+                f"<b>Właściwości sygnału:</b><br><br>"
+                f"<b>Średnia:</b> {mean_val:.4f}<br>"
+                f"<b>Średnia wartość bezwzględna:</b> {abs_mean_val:.4f}<br>"
+                f"<b>Moc średnia:</b> {mean_power:.4f}<br>"
+                f"<b>Wariancja:</b> {variation:.4f}<br>"
+                f"<b>Wartość skuteczna:</b> {effective:.4f}"
+            )
+
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setWindowTitle("Właściwości sygnału")
+            msg.setTextFormat(Qt.TextFormat.RichText)
+            msg.setText(summary)
+            msg.exec()
+        except Exception as e:
+            self.show_error_message("Błąd właściwości sygnału", str(e))
 
