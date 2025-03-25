@@ -24,7 +24,7 @@ class MatplotlibCanvas(FigureCanvas):
     def signal_plot(self, continuous_data, sampled_data, signal_type="Ciągły", title="Wykres sygnału"):
         self.ax.clear()
 
-        # Unpack data: [time, value]
+
         y_cont, t_cont = [], []
         y_samp, t_samp = [], []
         for el in continuous_data:
@@ -33,15 +33,13 @@ class MatplotlibCanvas(FigureCanvas):
         for el in sampled_data:
             y_samp.append(el[0])
             t_samp.append(el[1])
-        # y_cont, t_cont = continuous_data
-        # y_samp, t_samp = sampled_data
 
-        # Draw original (continuous) function
+
         self.ax.plot(t_cont, y_cont, label="Funkcja oryginalna", color='blue')
 
-        # Draw sampled points only if signal_type is 'Ciągły'
-        if signal_type == "Ciągły":
-            self.ax.plot(t_samp, y_samp, 'ro', label="Próbkowanie")  # czerwone kropki
+
+        if signal_type == "Dyskretny":
+            self.ax.plot(t_samp, y_samp, 'ro', label="Próbkowanie")
 
         self.ax.set_title(title)
         self.ax.set_xlabel("Czas [s]")
@@ -94,6 +92,8 @@ class SignalGeneratorApp(QWidget):
             "Sygnał prostokątny","Sygnał prostokątny symetryczny", "Sygnał trójkątny",
             "Skok jednostkowy", "Impuls jednostkowy", "Szum impulsowy"
         ])
+        self.combo_signal.setCurrentText("Szum jednostajny")
+
 
         self.label_signal_type = QLabel("Typ sygnału:")
         self.combo_signal_type = QComboBox()
@@ -144,15 +144,19 @@ class SignalGeneratorApp(QWidget):
         self.spin_sampling.setRange(0.001, 100.0)
         self.spin_sampling.setSingleStep(0.001)
         self.spin_sampling.setDecimals(4)
-        self.spin_sampling.setValue(0.01)
+        self.spin_sampling.setValue(30)
+        self.label_sampling.setVisible(False)
+        self.spin_sampling.setVisible(False)
 
         # jump_time
-        self.label_jump_time = QLabel("Okres próbkowania (T_s):")
+        self.label_jump_time = QLabel("Skok czasowy (jump_time):")
         self.spin_jump_time = QDoubleSpinBox()
         self.spin_jump_time.setRange(0.001, 100.0)
         self.spin_jump_time.setSingleStep(0.001)
         self.spin_jump_time.setDecimals(4)
         self.spin_jump_time.setValue(0.01)
+        self.label_jump_time.setVisible(False)
+        self.spin_jump_time.setVisible(False)
 
         # ns
         self.label_ns = QLabel("Numer próbki:")
@@ -160,6 +164,8 @@ class SignalGeneratorApp(QWidget):
         self.spin_ns.setRange(1, 100)
         self.spin_ns.setSingleStep(1)
         self.spin_ns.setValue(5)
+        self.label_ns.setVisible(False)
+        self.spin_ns.setVisible(False)
 
         # probability
         self.label_probability = QLabel("Prawdopodobieństwo:")
@@ -168,6 +174,8 @@ class SignalGeneratorApp(QWidget):
         self.spin_probability.setSingleStep(0.01)
         self.spin_probability.setDecimals(2)
         self.spin_probability.setValue(0.2)
+        self.label_probability.setVisible(False)
+        self.spin_probability.setVisible(False)
 
         # Przycisk generacji
         self.btn_generate = QPushButton("Generuj sygnał")
@@ -387,7 +395,7 @@ class SignalGeneratorApp(QWidget):
 
             # signal plot
             canvas_func = MatplotlibCanvas(self)
-            canvas_func.signal_plot(signal_list, sampling_list, signal_type=signal_type, title="Wykres funkcji")
+            canvas_func.signal_plot(signal_list, sampling_list, signal_type=sampling_type, title="Wykres funkcji")
             self.scroll_layout.addWidget(canvas_func)
 
             # Histogram
