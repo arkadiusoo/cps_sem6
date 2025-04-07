@@ -7,6 +7,7 @@ from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect
 
 from assignment_1.assignment_1_gui import SignalGeneratorApp
+from assignment_2.assignment_2_gui import SamplingQuantizationApp
 
 
 class MainWindow(QMainWindow):
@@ -16,7 +17,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Cyfrowe Przetwarzanie Sygnałów")
         self.resize(1200, 800)
 
-        # second screen if available otherwise first by default
+        # Second screen if available, otherwise default
         width, height = 1200, 800
         screens = QGuiApplication.screens()
         target_screen = screens[1] if len(screens) > 1 else screens[0]
@@ -32,7 +33,7 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
         self.task1_widget = SignalGeneratorApp()
-        self.task2_widget = QWidget()
+        self.task2_widget = SamplingQuantizationApp()  # <- zadanie 2
 
         self.stack.addWidget(self.task1_widget)
         self.stack.addWidget(self.task2_widget)
