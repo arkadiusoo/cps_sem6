@@ -39,4 +39,4 @@ This task implements a signal processing tool that allows users to generate, vis
 ---
 
 
-## Assignment 1 – Sampling and quantization (in progress)
+## Assignment 2 – Sampling and quantization (in progress)
