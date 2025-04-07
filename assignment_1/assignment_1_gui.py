@@ -70,20 +70,6 @@ class SignalGeneratorApp(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        width, height = 1000, 600
-        self.resize(width, height)
-        # available screens
-        screens = QGuiApplication.screens()
-
-        # second screen if available otherwise first by default
-        target_screen = screens[1] if len(screens) > 1 else screens[0]
-        screen_geometry: QRect = target_screen.geometry()
-        # center of the screen
-        x = screen_geometry.x() + (screen_geometry.width() - width) // 2
-        y = screen_geometry.y() + (screen_geometry.height() - height) // 2
-        self.move(x, y)
-
-
         self.label_signal = QLabel("Wybierz sygnał:")
         self.combo_signal = QComboBox()
         self.combo_signal.addItems([
@@ -173,7 +159,7 @@ class SignalGeneratorApp(QWidget):
         self.label_ns.setVisible(False)
         self.spin_ns.setVisible(False)
 
-        # probability
+
         self.label_probability = QLabel("Prawdopodobieństwo:")
         self.spin_probability = QDoubleSpinBox()
         self.spin_probability.setRange(0.01, 1.0)
@@ -183,20 +169,19 @@ class SignalGeneratorApp(QWidget):
         self.label_probability.setVisible(False)
         self.spin_probability.setVisible(False)
 
-        # Przycisk generacji
+
         self.btn_generate = QPushButton("Generuj sygnał")
         self.btn_generate.clicked.connect(self.generate_signal)
 
-        # Przycisk wczytywania
+
         self.btn_load = QPushButton("Wczytaj z pliku")
         self.btn_load.clicked.connect(self.load_signal)
 
-        # Przycisk zapisu
+
         self.btn_save = QPushButton("Zapisz do pliku")
         self.btn_save.clicked.connect(self.save_signal)
 
-        # Wykres
-        # self.plot_canvas = MatplotlibCanvas(self)
+
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
 
@@ -206,7 +191,7 @@ class SignalGeneratorApp(QWidget):
 
         self.scroll_area.setWidget(self.scroll_content)
 
-        # Lista wykresów
+
         self.list_signals = QListWidget()
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
@@ -514,13 +499,13 @@ class SignalGeneratorApp(QWidget):
         index = self.list_signals.row(item)
         info, signal_list, sampling_list, sampling_type, data = self.saved_signals[index]
 
-        # Wyczyść poprzednie wykresy
+
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget:
                 widget.setParent(None)
 
-        # Stwórz i dodaj nowe płótno
+
         canvas_func = MatplotlibCanvas(self)
         canvas_func.signal_plot(signal_list, sampling_list, signal_type=sampling_type, title=info)
         self.scroll_layout.addWidget(canvas_func)
@@ -662,12 +647,12 @@ class SignalGeneratorApp(QWidget):
 
 
     def perform_signal_operation(self, base_index, operation):
-        # Wyczyść poprzednie wykresy z layoutu
+
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget:
                 widget.setParent(None)
-        # Wybór drugiego sygnału
+
         items = [self.list_signals.item(i).text() for i in range(self.list_signals.count()) if i != base_index]
         if not items:
             self.show_error_message("Brak sygnałów", "Nie ma drugiego sygnału do wykonania operacji.")
@@ -680,11 +665,11 @@ class SignalGeneratorApp(QWidget):
         second_index = next(
             i for i in range(self.list_signals.count()) if self.list_signals.item(i).text() == item_text)
 
-        # Pobierz dane
+
         _, signal1, _, _, data = self.saved_signals[base_index]
         _, signal2, _, _, data2 = self.saved_signals[second_index]
 
-        # Zrównaj długości (minimum)
+
         min_len = min(len(signal1), len(signal2))
         sig1 = signal1[:min_len]
         sig2 = signal2[:min_len]
@@ -703,7 +688,7 @@ class SignalGeneratorApp(QWidget):
                 else:
                     result.append([y1 / y2, t1])
 
-        # Zaktualizuj interfejs
+
         plot_title = f"[{len(self.saved_signals) + 1}] Operacja ({data[0]} {operation} {data2[0]})"
         self.list_signals.addItem(plot_title)
         self.saved_signals.append((plot_title, result, [], "Ciągły", ["Operacja", data[1], data[2], "Ciągły", data[4], data[5], data[6], data[7], data[8], data[9], data[10]]))

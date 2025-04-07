@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QStackedWidget, QComboBox,
     QWidget, QVBoxLayout
 )
+from PyQt6.QtGui import QGuiApplication
+from PyQt6.QtCore import QRect
+
 from assignment_1.assignment_1_gui import SignalGeneratorApp
 
 
@@ -11,22 +14,29 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Cyfrowe Przetwarzanie Sygnałów")
-        self.setGeometry(100, 100, 1200, 800)
+        self.resize(1200, 800)
 
-        # Dropdown (combo box) do wyboru zadania
+        # second screen if available otherwise first by default
+        width, height = 1200, 800
+        screens = QGuiApplication.screens()
+        target_screen = screens[1] if len(screens) > 1 else screens[0]
+        screen_geometry: QRect = target_screen.geometry()
+
+        x = screen_geometry.x() + (screen_geometry.width() - width) // 2
+        y = screen_geometry.y() + (screen_geometry.height() - height) // 2
+        self.move(x, y)
+
         self.task_selector = QComboBox()
         self.task_selector.addItems(["Zadanie 1", "Zadanie 2"])
         self.task_selector.currentIndexChanged.connect(self.change_task)
 
-        # Przestrzeń na widoki zadań
         self.stack = QStackedWidget()
         self.task1_widget = SignalGeneratorApp()
-        self.task2_widget = QWidget()  # Placeholder – dodasz tu kolejne zadanie
+        self.task2_widget = QWidget()
 
         self.stack.addWidget(self.task1_widget)
         self.stack.addWidget(self.task2_widget)
 
-        # Layout główny
         layout = QVBoxLayout()
         layout.addWidget(self.task_selector)
         layout.addWidget(self.stack)
@@ -35,7 +45,6 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-        # Domyślnie pokazuj zadanie 1
         self.task_selector.setCurrentIndex(0)
 
     def change_task(self, index):
