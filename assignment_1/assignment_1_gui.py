@@ -1,4 +1,3 @@
-import numpy as np
 import logging
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox,
@@ -9,8 +8,7 @@ from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect, Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import signal_generator, file_manager, properties
-
+from assignment_1 import file_manager, properties, signal_generator
 
 
 class MatplotlibCanvas(FigureCanvas):
