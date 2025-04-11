@@ -32,3 +32,40 @@ def quantize_signal(signal_values, num_levels=256, method="round"):
     quantized_values = min_val + indices * step
     return quantized_values.tolist()
 
+def reconstruct_zoh(times, values, resolution=100):
+    reconstructed = []
+    for i in range(len(values) - 1):
+        t_start = times[i]
+        t_end = times[i+1]
+        for j in range(resolution):
+            t = t_start + (j / resolution) * (t_end - t_start)
+            reconstructed.append([values[i], t])
+
+    reconstructed.append([values[-1], times[-1]])
+    return reconstructed
+
+def reconstruct_foh(times, values, resolution=100):
+    reconstructed = []
+    for i in range(len(values) - 1):
+        t_start = times[i]
+        t_end = times[i+1]
+        for j in range(resolution):
+            t = t_start + (j / resolution) * (t_end - t_start)
+
+            y = values[i] + (values[i+1] - values[i]) * (t - t_start) / (t_end - t_start)
+            reconstructed.append([y, t])
+    reconstructed.append([values[-1], times[-1]])
+    return reconstructed
+
+def reconstruct_sinc(times, values, t_range=None, resolution=1000):
+    if t_range is None:
+        t_range = (min(times), max(times))
+
+    t_interp = np.linspace(t_range[0], t_range[1], resolution)
+    y_interp = np.zeros_like(t_interp)
+
+    Ts = times[1] - times[0]
+    for n in range(len(times)):
+        y_interp += values[n] * np.sinc((t_interp - times[n]) / Ts)
+
+    return list(zip(y_interp.tolist(), t_interp.tolist()))
