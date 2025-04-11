@@ -18,12 +18,12 @@ class SamplingQuantizationApp(QWidget):
 
         label_sampling = QLabel("Częstotliwość próbkowania [Hz]:")
         self.spin_sampling_freq = QDoubleSpinBox()
-        self.spin_sampling_freq.setRange(1, 100000)
+        # self.spin_sampling_freq.setRange(1, 100000)
         self.spin_sampling_freq.setValue(1000)
 
         label_quant_levels = QLabel("Liczba poziomów kwantyzacji:")
         self.spin_quant_levels = QSpinBox()
-        self.spin_quant_levels.setRange(2, 65536)
+        # self.spin_quant_levels.setRange(2, 65536)
         self.spin_quant_levels.setValue(256)
 
         label_quant_method = QLabel("Metoda kwantyzacji:")
