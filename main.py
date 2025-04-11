@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
 
         self.stack = QStackedWidget()
         self.task1_widget = SignalGeneratorApp()
-        self.task2_widget = SamplingQuantizationApp()  # <- zadanie 2
+        self.task2_widget = SamplingQuantizationApp(self.task1_widget.saved_signals)
 
         self.stack.addWidget(self.task1_widget)
         self.stack.addWidget(self.task2_widget)
@@ -49,6 +49,15 @@ class MainWindow(QMainWindow):
         self.task_selector.setCurrentIndex(0)
 
     def change_task(self, index):
+        if index == 1:
+
+            self.task2_widget.saved_signals = self.task1_widget.saved_signals
+
+
+            self.task2_widget.combo_signal_selector.clear()
+            for signal in self.task2_widget.saved_signals:
+                self.task2_widget.combo_signal_selector.addItem(signal[0])
+
         self.stack.setCurrentIndex(index)
 
 
