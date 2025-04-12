@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QSpinBox, QDoubleSpinBox, QPushButton,
-    QVBoxLayout, QHBoxLayout, QSlider, QCheckBox, QListWidget, QScrollArea
+    QVBoxLayout, QHBoxLayout, QSlider, QCheckBox, QListWidget, QScrollArea, QMessageBox
 )
 from assignment_1.plotting_utils import MatplotlibCanvas
 import numpy as np
@@ -23,7 +23,7 @@ class SamplingQuantizationApp(QWidget):
         controls_layout.addWidget(self.combo_signal_selector)
 
         self.spin_sampling_freq = QDoubleSpinBox()
-        self.spin_sampling_freq.setRange(0, 100000)
+        self.spin_sampling_freq.setRange(0.01, 100000)
         self.spin_sampling_freq.setValue(10)
 
         self.spin_quant_levels = QSpinBox()
@@ -90,43 +90,52 @@ class SamplingQuantizationApp(QWidget):
             self.combo_signal_selector.addItem(signal_info[0])
 
     def generate_and_plot(self):
-        selected_index = self.combo_signal_selector.currentIndex()
-        if selected_index < 0 or selected_index >= len(self.saved_signals):
-            return
+        try:
+            selected_index = self.combo_signal_selector.currentIndex()
+            if selected_index < 0 or selected_index >= len(self.saved_signals):
+                return
 
-        label, original, _, _, _ = self.saved_signals[selected_index]
-        y = [pt[0] for pt in original]
-        t = [pt[1] for pt in original]
-        duration = t[-1] - t[0] if t else 1.0
+            label, original, _, _, _ = self.saved_signals[selected_index]
+            y = [pt[0] for pt in original]
+            t = [pt[1] for pt in original]
+            duration = t[-1] - t[0] if t else 1.0
 
-        fs = self.spin_sampling_freq.value()
-        ts = np.arange(t[0], t[0] + duration, 1 / fs)
-        ys = np.interp(ts, t, y)
+            fs = self.spin_sampling_freq.value()
+            ts = np.arange(t[0], t[0] + duration, 1 / fs)
+            ys = np.interp(ts, t, y)
 
-        levels = self.spin_quant_levels.value()
-        quant_method = self.combo_quant_method.currentText()
-        max_amp = max(abs(np.min(ys)), abs(np.max(ys)))
-        step = 2 * max_amp / levels
+            levels = self.spin_quant_levels.value()
+            quant_method = self.combo_quant_method.currentText()
+            max_amp = max(abs(np.min(ys)), abs(np.max(ys)))
+            step = 2 * max_amp / levels
 
-        ys_q = (ys / step).astype(int) * step if quant_method == "Obcięcie" else np.round(ys / step) * step
+            ys_q = (ys / step).astype(int) * step if quant_method == "Obcięcie" else np.round(ys / step) * step
 
-        reconstruction_method = self.combo_reconstruction.currentText()
-        t_rec = np.linspace(t[0], t[0] + duration, 1000)
+            reconstruction_method = self.combo_reconstruction.currentText()
+            t_rec = np.linspace(t[0], t[0] + duration, 1000)
 
-        if reconstruction_method.startswith("Zero"):
-            y_rec = np.zeros_like(t_rec)
-            for i in range(len(ts) - 1):
-                mask = (t_rec >= ts[i]) & (t_rec < ts[i + 1])
-                y_rec[mask] = ys_q[i]
-            y_rec[t_rec >= ts[-1]] = ys_q[-1]
-        else:
-            y_rec = np.interp(t_rec, ts, ys_q)
+            if reconstruction_method.startswith("Zero"):
+                y_rec = np.zeros_like(t_rec)
+                for i in range(len(ts) - 1):
+                    mask = (t_rec >= ts[i]) & (t_rec < ts[i + 1])
+                    y_rec[mask] = ys_q[i]
+                y_rec[t_rec >= ts[-1]] = ys_q[-1]
+            else:
+                y_rec = np.interp(t_rec, ts, ys_q)
 
-        name = f"[{len(self.quantized_signals)+1}]- {label} - fs={fs}Hz, Q={levels}"
-        self.quantized_signals.append((name, t, y, ts, ys_q, t_rec, y_rec))
-        self.list_signals.addItem(name)
+            name = f"[{len(self.quantized_signals)+1}]- {label} - fs={fs}Hz, Q={levels}"
+            self.quantized_signals.append((name, t, y, ts, ys_q, t_rec, y_rec))
+            self.list_signals.addItem(name)
 
-        self.display_plot(name, t, y, ts, ys_q, t_rec, y_rec)
+            self.display_plot(name, t, y, ts, ys_q, t_rec, y_rec)
+            self.list_signals.setCurrentRow(self.list_signals.count() - 1)
+        except Exception as e:
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Critical)
+            msg.setWindowTitle("Error Message")
+
+            msg.setText(str(e))
+            msg.exec()
 
     def display_selected_signal(self, item):
         index = self.list_signals.row(item)
