@@ -124,47 +124,55 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
 def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
     square = []
     user_square = []
-    i = 0
-    j = 0
-    while i < duration:
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
         value = 0
-        if i > start:
-            if (i - start) % period < period * kw:
+        if time > start:
+            phase = (time - start) % period
+            if phase < period * kw:
                 value = amplitude
-        square.append([value, i])
+
+        square.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_square.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_square.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
-    # print(len(square), len(user_square))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return square, user_square
 
 
 def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
     square = []
     user_square = []
-    i = 0
-    j = 0
-    while i < duration:
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
         value = 0
-        if i > start:
+        if time > start:
+            phase = (time - start) % period
             value = -amplitude
-            if (i - start) % period < period * kw:
+            if phase < period * kw:
                 value = amplitude
-        square.append([value, i])
+
+        square.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_square.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_square.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
-    # print(len(square), len(user_square))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return square, user_square
 
 
