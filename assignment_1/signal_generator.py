@@ -1,26 +1,29 @@
 import numpy as np
 
+DEFAULT_CONTINUOUS_RATE = 70
+SAMPLE_SKIP_RATIO = 3
 
 def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
     noise = []
     user_noise = []
-    i = 0
-    j = 0
-    while i < duration:
-        value = 0
-        if i > start:
-            value = np.random.uniform(-amplitude, amplitude)
-        noise.append([value, i])
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
+        value = np.random.uniform(-amplitude, amplitude) if time > start else 0
+        noise.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_noise.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_noise.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
-    # print(len(noise), len(user_noise))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return noise, user_noise
+
 
 
 def gauss_noise(amplitude, start, duration, sample_rate=None):
