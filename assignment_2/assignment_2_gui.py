@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QSpinBox, QDoubleSpinBox, QPushButton,
     QVBoxLayout, QHBoxLayout, QSlider, QCheckBox, QListWidget, QScrollArea
 )
-from assignment_1.assignment_1_gui import MatplotlibCanvas
+from assignment_1.plotting_utils import MatplotlibCanvas
 import numpy as np
 
 class SamplingQuantizationApp(QWidget):
