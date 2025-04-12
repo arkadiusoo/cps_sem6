@@ -8,7 +8,7 @@ from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect, Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from assignment_1 import file_manager, properties, signal_generator
+from assignment_1 import file_manager, properties, signal_generator, signal_operations
 
 
 class MatplotlibCanvas(FigureCanvas):
@@ -655,9 +655,7 @@ class SignalGeneratorApp(QWidget):
             if operation:
                 self.perform_signal_operation(index, operation)
 
-
     def perform_signal_operation(self, base_index, operation):
-
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget:
@@ -675,33 +673,17 @@ class SignalGeneratorApp(QWidget):
         second_index = next(
             i for i in range(self.list_signals.count()) if self.list_signals.item(i).text() == item_text)
 
-
         _, signal1, _, _, data = self.saved_signals[base_index]
         _, signal2, _, _, data2 = self.saved_signals[second_index]
 
-
-        min_len = min(len(signal1), len(signal2))
-        sig1 = signal1[:min_len]
-        sig2 = signal2[:min_len]
-
-        result = []
-        for (y1, t1), (y2, t2) in zip(sig1, sig2):
-            if operation == "add":
-                result.append([y1 + y2, t1])
-            elif operation == "sub":
-                result.append([y1 - y2, t1])
-            elif operation == "mul":
-                result.append([y1 * y2, t1])
-            elif operation == "div":
-                if y2 == 0:
-                    result.append([0, t1])
-                else:
-                    result.append([y1 / y2, t1])
-
+        result = signal_operations.perform_signal_operation(signal1, signal2, operation)
 
         plot_title = f"[{len(self.saved_signals) + 1}] Operacja ({data[0]} {operation} {data2[0]})"
         self.list_signals.addItem(plot_title)
-        self.saved_signals.append((plot_title, result, [], "Ciągły", ["Operacja", data[1], data[2], "Ciągły", data[4], data[5], data[6], data[7], data[8], data[9], data[10]]))
+        self.saved_signals.append((
+            plot_title, result, [], "Ciągły",
+            ["Operacja", data[1], data[2], "Ciągły", data[4], data[5], data[6], data[7], data[8], data[9], data[10]]
+        ))
 
         canvas_func = MatplotlibCanvas(self)
         canvas_func.signal_plot(result, [], signal_type="Ciągły", title=plot_title)
