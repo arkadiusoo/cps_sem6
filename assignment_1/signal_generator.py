@@ -51,69 +51,73 @@ def gauss_noise(amplitude, start, duration, sample_rate=None):
 def sinus(amplitude, period, start, duration, sample_rate=None):
     sinus = []
     user_sinus = []
-    i = 0
-    j = 0
-    while i < duration:
-        value = 0
-        if i > start:
-            value = amplitude * np.sin(((2 * np.pi) / period) * (i - start))
-        sinus.append([value, i])
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
+        value = amplitude * np.sin(((2 * np.pi) / period) * (time - start)) if time > start else 0
+        sinus.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_sinus.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_sinus.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
-    # print(len(sinus), len(user_sinus))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return sinus, user_sinus
+
 
 
 def sinus_abs(amplitude, period, start, duration, sample_rate=None):
     sinus = []
     user_sinus = []
-    i = 0
-    j = 0
-    while i < duration:
-        value = 0
-        if i > start:
-            value = amplitude * abs(
-                np.sin(((2 * np.pi) / period) * (i - start)))
-        sinus.append([value, i])
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
+        value = amplitude * abs(np.sin(((2 * np.pi) / period) * (time - start))) if time > start else 0
+        sinus.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_sinus.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_sinus.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
-    # print(len(sinus), len(user_sinus))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return sinus, user_sinus
+
 
 
 def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
     sinus = []
     user_sinus = []
-    i = 0
-    j = 0
-    while i < duration:
-        value = 0
-        if i > start:
-            value = (amplitude * (
-                    (np.sin(((2 * np.pi) / period) * (i - start))) + abs(
-                (np.sin(((2 * np.pi) / period) * (i - start)))))) / 2
-        sinus.append([value, i])
-        if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_sinus.append([value, i])
-                j = 0
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
+        if time > start:
+            base = np.sin(((2 * np.pi) / period) * (time - start))
+            value = amplitude * (base + abs(base)) / 2
         else:
-            i += 1 / 70
-    # print(len(sinus), len(user_sinus))
+            value = 0
+
+        sinus.append([value, time])
+
+        if sample_rate is not None:
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_sinus.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
+        else:
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return sinus, user_sinus
 
 

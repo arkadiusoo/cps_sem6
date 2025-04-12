@@ -129,7 +129,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_period.setRange(0.001, 1000.0)
         self.spin_period.setSingleStep(0.1)
         self.spin_period.setDecimals(3)
-        self.spin_period.setValue(0)
+        self.spin_period.setValue(1)
 
         # kw
         self.label_duty = QLabel("Współ. wypełnienia (k_w):")
