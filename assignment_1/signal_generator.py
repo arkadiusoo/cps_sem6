@@ -179,51 +179,56 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
 def triangular(amplitude, period, start, duration, kw, sample_rate=None):
     triangle = []
     user_triangle = []
-    i = 0
-    j = 0
-    while i < duration:
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
         value = 0
-        if i > start:
-            phase = (i - start) % period
+        if time > start:
+            phase = (time - start) % period
             if phase < period * kw:
                 value = (2 * amplitude / (period * kw)) * phase
             else:
-                value = ((2 * amplitude / (period * (1 - kw))) * (
-                        period - phase))
-        triangle.append([value, i])
+                value = (2 * amplitude / (period * (1 - kw))) * (period - phase)
+
+        triangle.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_triangle.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_triangle.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return triangle, user_triangle
 
 
 def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
     jump = []
     user_jump = []
-    i = 0
-    j = 0
-    while i < duration:
+
+    time = 0.0
+    counter = 0
+
+    while time < duration:
         value = 0
-        if i == jump_time:
+        if time == jump_time:
             value = amplitude / 2
-        elif i > jump_time:
+        elif time > jump_time:
             value = amplitude
 
-        jump.append([value, i])
+        jump.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / (3 * sample_rate)
-            j += 1
-            if j % 3 == 0:
-                user_jump.append([value, i])
-                j = 0
+            if counter % SAMPLE_SKIP_RATIO == 0:
+                user_jump.append([value, time])
+            counter += 1
+            time += 1 / (sample_rate * SAMPLE_SKIP_RATIO)
         else:
-            i += 1 / 70
-    # print(len(jump), len(user_jump))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return jump, user_jump
 
 
