@@ -55,7 +55,7 @@ class PlotWindow(QWidget):
         self.resize(800, 600)
 
         layout = QVBoxLayout(self)
-        new_fig = Figure(figsize=(10, 6))
+        new_fig = Figure(figsize=(5, 4))
         new_ax = new_fig.add_subplot(111)
 
         for ax in fig.axes:

@@ -148,7 +148,7 @@ class SamplingQuantizationApp(QWidget):
         ax.set_xlabel("Czas [s]")
         ax.set_ylabel("Amplituda")
         ax.grid()
-        ax.legend()
+
         canvas.draw()
 
         self.scroll_layout.addWidget(canvas)
