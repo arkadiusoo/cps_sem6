@@ -97,7 +97,7 @@ class SignalGeneratorApp(QWidget):
         # d
         self.label_duration = QLabel("Czas trwania (d):")
         self.spin_duration = QDoubleSpinBox()
-        self.spin_duration.setRange(0.000, 100.0)
+        self.spin_duration.setRange(0.000, 1000.0)
         self.spin_duration.setSingleStep(0.1)
         self.spin_duration.setDecimals(3)
         self.spin_duration.setValue(3)
@@ -105,7 +105,7 @@ class SignalGeneratorApp(QWidget):
         # t1
         self.label_start_time = QLabel("Czas początkowy (t1):")
         self.spin_start_time = QDoubleSpinBox()
-        self.spin_start_time.setRange(0.000, 100.0)
+        self.spin_start_time.setRange(0.000, 1000.0)
         self.spin_start_time.setSingleStep(0.1)
         self.spin_start_time.setDecimals(3)
         self.spin_start_time.setValue(0)
@@ -117,7 +117,7 @@ class SignalGeneratorApp(QWidget):
         # self.spin_period.setSingleStep(1)
         # self.spin_period.setValue(5)
         self.spin_period = QDoubleSpinBox()
-        self.spin_period.setRange(0.001, 100.0)
+        self.spin_period.setRange(0.001, 1000.0)
         self.spin_period.setSingleStep(0.1)
         self.spin_period.setDecimals(3)
         self.spin_period.setValue(0)
