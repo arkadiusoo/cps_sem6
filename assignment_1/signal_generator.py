@@ -238,34 +238,41 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
 
 def one_timer(amplitude, start, ns, duration, sample_rate):
     jump = []
-    i = 0
-    while i < duration:
+
+    time = 0.0
+    sample_index = 0  # licznik indeksów próbek
+
+    while time < duration:
         value = 0
-        if i > start:
-            if i == ns:
+        if time > start:
+            if sample_index == ns:
                 value = amplitude
-            jump.append([value, i])
+            jump.append([value, time])
+            sample_index += 1
+
         if sample_rate is not None:
-            i += 1 / sample_rate
+            time += 1 / sample_rate
         else:
-            i += 1 / 70
-    # print(len(jump))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return jump, []
 
 
 def impulse_noise(amplitude, start, probability, duration, sample_rate):
     noise = []
-    i = 0
-    while i < duration:
+
+    time = 0.0
+
+    while time < duration:
         value = 0
-        if i > start:
-            random_number = np.random.uniform(0, 1)
-            if random_number < probability:
+        if time > start:
+            if np.random.uniform(0, 1) < probability:
                 value = amplitude
-            noise.append([value, i])
+            noise.append([value, time])
+
         if sample_rate is not None:
-            i += 1 / sample_rate
+            time += 1 / sample_rate
         else:
-            i += 1 / 70
-    # print("dlugosc",len(noise))
+            time += 1 / DEFAULT_CONTINUOUS_RATE
+
     return noise, []
