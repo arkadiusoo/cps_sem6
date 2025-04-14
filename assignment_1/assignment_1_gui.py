@@ -67,9 +67,9 @@ class SignalGeneratorApp(QWidget):
         # self.spin_period.setSingleStep(1)
         # self.spin_period.setValue(5)
         self.spin_period = QDoubleSpinBox()
-        self.spin_period.setRange(0.001, 1000.0)
+        self.spin_period.setRange(0.00001, 1000.0)
         self.spin_period.setSingleStep(0.1)
-        self.spin_period.setDecimals(3)
+        self.spin_period.setDecimals(5)
         self.spin_period.setValue(0.01)
 
         # kw
