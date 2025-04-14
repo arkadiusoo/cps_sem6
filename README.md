@@ -39,4 +39,24 @@ This task implements a signal processing tool that allows users to generate, vis
 ---
 
 
-## Assignment 2 – Sampling and quantization (in progress)
+## Assignment 2 – Sampling and Quantization
+
+This task extends the first assignment by introducing signal digitization and reconstruction techniques.
+
+### Implemented Features
+
+- **Sampling of signals** from Assignment 1 with adjustable sampling frequency
+- **Quantization** methods:
+  - Truncation
+  - Rounding
+- **Reconstruction** methods:
+  - Zero-order hold (ZOH)
+  - First-order hold (FOH)
+  - Sinc interpolation
+- **Interactive plots**: original vs quantized vs reconstructed signal
+- **Comparison metrics**:
+  - MSE, SNR, PSNR, MD
+  - Theoretical SNR (for sinusoidal signals)
+  - ENOB (Effective Number of Bits)
+- **Signal info popup** on double-click with full analysis
+
