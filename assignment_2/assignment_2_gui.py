@@ -2,12 +2,15 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QSpinBox, QDoubleSpinBox, QPushButton,
     QVBoxLayout, QHBoxLayout, QSlider, QCheckBox, QListWidget, QScrollArea, QMessageBox
 )
+from PyQt6.QtCore import Qt
 from assignment_1.plotting_utils import MatplotlibCanvas
 from assignment_2.quantization_functions import (
     sample_signal, quantize_signal, reconstruct_zoh,
     reconstruct_foh, reconstruct_sinc
 )
-
+from assignment_2.comprasion_metrics import (
+    compute_mse, compute_snr, compute_psnr, compute_md
+)
 import numpy as np
 
 class SamplingQuantizationApp(QWidget):
@@ -68,6 +71,7 @@ class SamplingQuantizationApp(QWidget):
         self.list_signals = QListWidget()
         self.list_signals.setFixedWidth(250)
         self.list_signals.itemClicked.connect(self.display_selected_signal)
+        self.list_signals.itemDoubleClicked.connect(self.show_comprasion_metrics)
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -164,3 +168,37 @@ class SamplingQuantizationApp(QWidget):
 
         self.scroll_layout.addWidget(canvas)
         self.current_signal = y
+
+    def show_error_message(self, title, message):
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Icon.Critical)
+        msg.setWindowTitle(title)
+        msg.setText(message)
+        msg.exec()
+
+    def show_comprasion_metrics(self, item):
+        try:
+            index = self.list_signals.row(item)
+            info, signal_list, sampling_list, sampling_type, data = self.saved_signals[index]
+            quantized_signal = self.quantized_signals[index]
+            mse = compute_mse(signal_list, quantized_signal)
+            snr = compute_snr(signal_list, quantized_signal)
+            psnr = compute_psnr(signal_list, quantized_signal)
+            md = compute_md(signal_list, quantized_signal)
+
+            summary = (
+                f"<b>Informacje o sygnale {info}:</b><br><br>"
+                f"<b>Średni błąd kwadratowy:</b> {mse:.4f}<br>"
+                f"<b>Stosunek sygnału do szumu:</b> {snr:.4f}<br>"
+                f"<b>Szczytowy stosunek sygnału do szumu:</b> {psnr:.4f}<br>"
+                f"<b>Maksymalna różnica:</b> {md:.4f}<br>"
+                # f"<b>Wartość skuteczna:</b> {effective:.4f}"
+            )
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setWindowTitle("Właściwości sygnału")
+            msg.setTextFormat(Qt.TextFormat.RichText)
+            msg.setText(summary)
+            msg.exec()
+        except Exception as e:
+            self.show_error_message("Błąd właściwości sygnału", str(e))
