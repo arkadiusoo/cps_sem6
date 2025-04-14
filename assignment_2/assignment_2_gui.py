@@ -11,6 +11,7 @@ from assignment_2.quantization_functions import (
 from assignment_2.comprasion_metrics import (
     compute_mse, compute_snr, compute_psnr, compute_md
 )
+from scipy.interpolate import interp1d
 import numpy as np
 
 class SamplingQuantizationApp(QWidget):
@@ -179,26 +180,41 @@ class SamplingQuantizationApp(QWidget):
     def show_comprasion_metrics(self, item):
         try:
             index = self.list_signals.row(item)
-            info, signal_list, sampling_list, sampling_type, data = self.saved_signals[index]
-            quantized_signal = self.quantized_signals[index]
-            mse = compute_mse(signal_list, quantized_signal)
-            snr = compute_snr(signal_list, quantized_signal)
-            psnr = compute_psnr(signal_list, quantized_signal)
-            md = compute_md(signal_list, quantized_signal)
+
+            # original data
+            original_info = self.saved_signals[self.combo_signal_selector.currentIndex()]
+            original_label, original_data, _, _, _ = original_info
+            original_y = np.array([pt[0] for pt in original_data])
+            original_t = np.array([pt[1] for pt in original_data])
+
+            # quantized data
+            name, t, y, ts, ys_q, t_rec, y_rec = self.quantized_signals[index]
+            y_rec = np.array(y_rec)
+            t_rec = np.array(t_rec)
+
+            # interpolation of reconstruction to original data length
+            interp_func = interp1d(t_rec, y_rec, kind="linear", bounds_error=False, fill_value="extrapolate")
+            aligned_y_rec = interp_func(original_t)
+
+            mse = compute_mse(original_y, aligned_y_rec)
+            snr = compute_snr(original_y, aligned_y_rec)
+            psnr = compute_psnr(original_y, aligned_y_rec)
+            md = compute_md(original_y, aligned_y_rec)
 
             summary = (
-                f"<b>Informacje o sygnale {info}:</b><br><br>"
-                f"<b>Średni błąd kwadratowy:</b> {mse:.4f}<br>"
-                f"<b>Stosunek sygnału do szumu:</b> {snr:.4f}<br>"
-                f"<b>Szczytowy stosunek sygnału do szumu:</b> {psnr:.4f}<br>"
-                f"<b>Maksymalna różnica:</b> {md:.4f}<br>"
-                # f"<b>Wartość skuteczna:</b> {effective:.4f}"
+                f"<b>Informacje o sygnale {name}:</b><br><br>"
+                f"Średni błąd kwadratowy (MSE): {mse:.4f}<br>"
+                f"Stosunek sygnału do szumu (SNR): {snr:.4f}<br>"
+                f"Szczytowy stosunek sygnału do szumu (PSNR): {psnr:.4f}<br>"
+                f"Maksymalna różnica (MD): {md:.4f}<br>"
             )
+
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("Właściwości sygnału")
+            msg.setWindowTitle("Metryki porównawcze")
             msg.setTextFormat(Qt.TextFormat.RichText)
             msg.setText(summary)
             msg.exec()
+
         except Exception as e:
             self.show_error_message("Błąd właściwości sygnału", str(e))
