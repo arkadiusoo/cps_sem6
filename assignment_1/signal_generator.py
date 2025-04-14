@@ -3,6 +3,26 @@ import numpy as np
 DEFAULT_CONTINUOUS_RATE = 70
 SAMPLE_SKIP_RATIO = 3
 
+def adaptive_rate_decorator(func):
+    def wrapper(*args, **kwargs):
+        global DEFAULT_CONTINUOUS_RATE
+
+        try:
+            if 'duration' in kwargs:
+                duration = kwargs['duration']
+            else:
+                duration = args[3]
+
+            DEFAULT_CONTINUOUS_RATE = max(min(int(1000 / duration), 2000), 70)
+
+        except Exception as e:
+            print(f"[WARN] adaptive_rate_decorator failed: {e}")
+            DEFAULT_CONTINUOUS_RATE = 70
+
+        return func(*args, **kwargs)
+    return wrapper
+
+@adaptive_rate_decorator
 def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
     noise = []
     user_noise = []
@@ -25,7 +45,7 @@ def uniform_dist_noise(amplitude, start, duration, sample_rate=None):
     return noise, user_noise
 
 
-
+@adaptive_rate_decorator
 def gauss_noise(amplitude, start, duration, sample_rate=None):
     noise = []
     user_noise = []
@@ -47,7 +67,7 @@ def gauss_noise(amplitude, start, duration, sample_rate=None):
 
     return noise, user_noise
 
-
+@adaptive_rate_decorator
 def sinus(amplitude, period, start, duration, sample_rate=None):
     sinus = []
     user_sinus = []
@@ -70,7 +90,7 @@ def sinus(amplitude, period, start, duration, sample_rate=None):
     return sinus, user_sinus
 
 
-
+@adaptive_rate_decorator
 def sinus_abs(amplitude, period, start, duration, sample_rate=None):
     sinus = []
     user_sinus = []
@@ -93,7 +113,7 @@ def sinus_abs(amplitude, period, start, duration, sample_rate=None):
     return sinus, user_sinus
 
 
-
+@adaptive_rate_decorator
 def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
     sinus = []
     user_sinus = []
@@ -120,7 +140,7 @@ def sinus_one_half(amplitude, period, start, duration, sample_rate=None):
 
     return sinus, user_sinus
 
-
+@adaptive_rate_decorator
 def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
     square = []
     user_square = []
@@ -147,7 +167,7 @@ def square_classic(amplitude, period, start, duration, kw, sample_rate=None):
 
     return square, user_square
 
-
+@adaptive_rate_decorator
 def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
     square = []
     user_square = []
@@ -175,7 +195,7 @@ def square_simetric(amplitude, period, start, duration, kw, sample_rate=None):
 
     return square, user_square
 
-
+@adaptive_rate_decorator
 def triangular(amplitude, period, start, duration, kw, sample_rate=None):
     triangle = []
     user_triangle = []
@@ -204,7 +224,7 @@ def triangular(amplitude, period, start, duration, kw, sample_rate=None):
 
     return triangle, user_triangle
 
-
+@adaptive_rate_decorator
 def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
     jump = []
     user_jump = []
@@ -235,7 +255,7 @@ def jump_signal(amplitude, start, duration, jump_time, sample_rate=None):
 # discrete functions
 # n1 is the probe id from witch we are counting up till ns
 
-
+@adaptive_rate_decorator
 def one_timer(amplitude, start, ns, duration, sample_rate):
     jump = []
 
@@ -257,7 +277,7 @@ def one_timer(amplitude, start, ns, duration, sample_rate):
 
     return jump, []
 
-
+@adaptive_rate_decorator
 def impulse_noise(amplitude, start, probability, duration, sample_rate):
     noise = []
 

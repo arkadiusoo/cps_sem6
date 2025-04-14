@@ -161,6 +161,8 @@ class SamplingQuantizationApp(QWidget):
         ax.plot(ts, ys_q, "ro", label="Próbki (kwantyzowane)")
         ax.plot(t_rec, y_rec, label="Rekonstrukcja")
         ax.set_title(title)
+        quantized_points = len(ys_q)
+        ax.set_title(f"{title}\nLiczba punktów kwantyzowanych: {quantized_points}")
         ax.set_xlabel("Czas [s]")
         ax.set_ylabel("Amplituda")
         ax.grid()
