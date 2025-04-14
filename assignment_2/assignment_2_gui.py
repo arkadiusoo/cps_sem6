@@ -201,12 +201,27 @@ class SamplingQuantizationApp(QWidget):
             psnr = compute_psnr(original_y, aligned_y_rec)
             md = compute_md(original_y, aligned_y_rec)
 
+            # theoretical SNR - for sinusoidal signals
+            levels = self.spin_quant_levels.value()
+            bits = int(np.log2(levels))
+            snr_theoretical = 6.02 * bits + 1.76
+
+            # ENOB
+            enob = (snr - 1.76) / 6.02
+
             summary = (
-                f"<b>Informacje o sygnale {name}:</b><br><br>"
-                f"Średni błąd kwadratowy (MSE): {mse:.4f}<br>"
-                f"Stosunek sygnału do szumu (SNR): {snr:.4f}<br>"
-                f"Szczytowy stosunek sygnału do szumu (PSNR): {psnr:.4f}<br>"
-                f"Maksymalna różnica (MD): {md:.4f}<br>"
+                f"<b>Informacje o sygnale:</b><br>"
+                f"<span style='font-weight:normal'>{name}</span><br><br>"
+
+                f"<b>Średni błąd kwadratowy (MSE):</b> <span style='font-weight:normal'>{mse:.4f}</span><br>"
+                f"<b>Stosunek sygnału do szumu (SNR):</b> <span style='font-weight:normal'>{snr:.4f} dB</span><br>"
+                f"<b>Szczytowy stosunek sygnału do szumu (PSNR):</b> <span style='font-weight:normal'>{psnr:.4f} dB</span><br>"
+                f"<b>Maksymalna różnica (MD):</b> <span style='font-weight:normal'>{md:.4f}</span><br><br>"
+
+                f"<b>Teoretyczny SNR:</b> <span style='font-weight:normal'>{snr_theoretical:.2f} dB</span><br>"
+                f"<i>(dotyczy idealnie sinusoidalnych sygnałów)</i><br><br>"
+
+                f"<b>Efektywna liczba bitów (ENOB):</b> <span style='font-weight:normal'>{enob:.2f} bit</span>"
             )
 
             msg = QMessageBox(self)
