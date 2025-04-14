@@ -8,58 +8,8 @@ from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtCore import QRect, Qt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from assignment_1 import file_manager, properties, signal_generator
-
-
-class MatplotlibCanvas(FigureCanvas):
-    def __init__(self, parent=None):
-        self.fig = Figure(figsize=(5, 4))
-        self.ax = self.fig.add_subplot(111)
-        super().__init__(self.fig)
-        self.setParent(parent)
-        self.setMinimumHeight(300)
-        self.saved_signals = []
-
-    def signal_plot(self, continuous_data, sampled_data, signal_type="Ciągły", title="Wykres sygnału"):
-        self.ax.clear()
-
-
-        y_cont, t_cont = [], []
-        y_samp, t_samp = [], []
-        for el in continuous_data:
-            y_cont.append(el[0])
-            t_cont.append(el[1])
-        for el in sampled_data:
-            y_samp.append(el[0])
-            t_samp.append(el[1])
-
-
-        self.ax.plot(t_cont, y_cont, label="Funkcja oryginalna", color='blue')
-
-
-        if signal_type == "Dyskretny":
-            self.ax.plot(t_samp, y_samp, 'ro', label="Próbkowanie")
-
-        self.ax.set_title(title)
-        self.ax.set_xlabel("Czas [s]")
-        self.ax.set_ylabel("Amplituda")
-        self.ax.grid()
-        # self.ax.legend()
-        self.fig.tight_layout()
-        self.draw()
-
-    def plot_histogram(self, values, bins=10, title="Histogram amplitudy"):
-        self.ax.clear()
-
-        # Draw histogram
-        self.ax.hist(values, bins=bins, color="darkorange", edgecolor="black")
-
-        self.ax.set_title(title)
-        self.ax.set_xlabel("Amplituda")
-        self.ax.set_ylabel("Liczba wystąpień")
-        self.ax.grid()
-        self.fig.tight_layout()
-        self.draw()
+from assignment_1 import file_manager, properties, signal_generator, signal_operations
+from assignment_1.plotting_utils import MatplotlibCanvas
 
 
 class SignalGeneratorApp(QWidget):
@@ -90,24 +40,24 @@ class SignalGeneratorApp(QWidget):
         self.label_amp = QLabel("Amplituda (A):")
         self.spin_amp = QDoubleSpinBox()
         self.spin_amp.setRange(0.001, 100.0)
-        self.spin_amp.setSingleStep(0.1)
+        self.spin_amp.setSingleStep(1)
         self.spin_amp.setDecimals(3)
-        self.spin_amp.setValue(5)
+        self.spin_amp.setValue(1)
 
         # d
         self.label_duration = QLabel("Czas trwania (d):")
         self.spin_duration = QDoubleSpinBox()
-        self.spin_duration.setRange(0.000, 100.0)
-        self.spin_duration.setSingleStep(0.1)
-        self.spin_duration.setDecimals(3)
-        self.spin_duration.setValue(3)
+        self.spin_duration.setRange(0.000, 1000.0)
+        self.spin_duration.setSingleStep(1)
+        self.spin_duration.setDecimals(2)
+        self.spin_duration.setValue(0.1)
 
         # t1
         self.label_start_time = QLabel("Czas początkowy (t1):")
         self.spin_start_time = QDoubleSpinBox()
-        self.spin_start_time.setRange(0.000, 100.0)
+        self.spin_start_time.setRange(0.000, 1000.0)
         self.spin_start_time.setSingleStep(0.1)
-        self.spin_start_time.setDecimals(3)
+        self.spin_start_time.setDecimals(2)
         self.spin_start_time.setValue(0)
 
         # T
@@ -117,10 +67,10 @@ class SignalGeneratorApp(QWidget):
         # self.spin_period.setSingleStep(1)
         # self.spin_period.setValue(5)
         self.spin_period = QDoubleSpinBox()
-        self.spin_period.setRange(0.001, 100.0)
+        self.spin_period.setRange(0.00001, 1000.0)
         self.spin_period.setSingleStep(0.1)
-        self.spin_period.setDecimals(3)
-        self.spin_period.setValue(0)
+        self.spin_period.setDecimals(5)
+        self.spin_period.setValue(0.01)
 
         # kw
         self.label_duty = QLabel("Współ. wypełnienia (k_w):")
@@ -396,6 +346,7 @@ class SignalGeneratorApp(QWidget):
 
             # Histogram
             canvas_hist = MatplotlibCanvas(self)
+            canvas_hist.allow_dblclick = False
             y = []
             for i in signal_list:
                 y.append(i[0])
@@ -645,9 +596,7 @@ class SignalGeneratorApp(QWidget):
             if operation:
                 self.perform_signal_operation(index, operation)
 
-
     def perform_signal_operation(self, base_index, operation):
-
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget:
@@ -665,33 +614,17 @@ class SignalGeneratorApp(QWidget):
         second_index = next(
             i for i in range(self.list_signals.count()) if self.list_signals.item(i).text() == item_text)
 
-
         _, signal1, _, _, data = self.saved_signals[base_index]
         _, signal2, _, _, data2 = self.saved_signals[second_index]
 
-
-        min_len = min(len(signal1), len(signal2))
-        sig1 = signal1[:min_len]
-        sig2 = signal2[:min_len]
-
-        result = []
-        for (y1, t1), (y2, t2) in zip(sig1, sig2):
-            if operation == "add":
-                result.append([y1 + y2, t1])
-            elif operation == "sub":
-                result.append([y1 - y2, t1])
-            elif operation == "mul":
-                result.append([y1 * y2, t1])
-            elif operation == "div":
-                if y2 == 0:
-                    result.append([0, t1])
-                else:
-                    result.append([y1 / y2, t1])
-
+        result = signal_operations.perform_signal_operation(signal1, signal2, operation)
 
         plot_title = f"[{len(self.saved_signals) + 1}] Operacja ({data[0]} {operation} {data2[0]})"
         self.list_signals.addItem(plot_title)
-        self.saved_signals.append((plot_title, result, [], "Ciągły", ["Operacja", data[1], data[2], "Ciągły", data[4], data[5], data[6], data[7], data[8], data[9], data[10]]))
+        self.saved_signals.append((
+            plot_title, result, [], "Ciągły",
+            ["Operacja", data[1], data[2], "Ciągły", data[4], data[5], data[6], data[7], data[8], data[9], data[10]]
+        ))
 
         canvas_func = MatplotlibCanvas(self)
         canvas_func.signal_plot(result, [], signal_type="Ciągły", title=plot_title)
@@ -702,3 +635,4 @@ class SignalGeneratorApp(QWidget):
         canvas_hist.plot_histogram(y, bins=self.slider_bins.value(),
                                    title="Histogram amplitudy dla {}".format(plot_title))
         self.scroll_layout.addWidget(canvas_hist)
+
