@@ -136,6 +136,7 @@ class SamplingQuantizationApp(QWidget):
             self.list_signals.setCurrentRow(self.list_signals.count() - 1)
             print("dlugosc t, y", len(t), len(y))
             print("dlugosc ts, ys_q", len(ts), len(ys_q))
+            print("dlugosc t_rec, y_rec", len(t_rec), len(y_rec))
             self.display_plot(name, t, y, ts, ys_q, t_rec, y_rec)
 
         except Exception as e:
