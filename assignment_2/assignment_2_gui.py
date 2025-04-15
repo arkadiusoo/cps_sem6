@@ -33,7 +33,7 @@ class SamplingQuantizationApp(QWidget):
 
         self.spin_sampling_freq = QDoubleSpinBox()
         self.spin_sampling_freq.setRange(0.01, 100000)
-        self.spin_sampling_freq.setValue(10)
+        self.spin_sampling_freq.setValue(600)
 
         self.spin_quant_levels = QSpinBox()
         self.spin_quant_levels.setRange(1, 65536)

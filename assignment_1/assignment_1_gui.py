@@ -29,7 +29,7 @@ class SignalGeneratorApp(QWidget):
             "Sygnał prostokątny","Sygnał prostokątny symetryczny", "Sygnał trójkątny",
             "Skok jednostkowy", "Impuls jednostkowy", "Szum impulsowy"
         ])
-        self.combo_signal.setCurrentText("Szum jednostajny")
+        self.combo_signal.setCurrentText("Sygnał sinusoidalny")
 
 
         self.label_signal_type = QLabel("Typ sygnału:")
@@ -50,7 +50,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_duration.setRange(0.000, 1000.0)
         self.spin_duration.setSingleStep(1)
         self.spin_duration.setDecimals(2)
-        self.spin_duration.setValue(0.1)
+        self.spin_duration.setValue(0.01)
 
         # t1
         self.label_start_time = QLabel("Czas początkowy (t1):")
