@@ -3,10 +3,15 @@ import numpy as np
 def sample_signal(signal_values, time_values, sampling_freq):
     sampling_interval = 1.0 / sampling_freq
 
-    num_samples = int((time_values[-1] - time_values[0]) / sampling_interval) + 1
-    sampled_times = np.linspace(time_values[0], time_values[-1], num_samples)
+    start_time = time_values[0]
+    end_time = time_values[-1]
+
+
+    sampled_times = np.arange(start_time, end_time, sampling_interval)
+
 
     sampled_values = np.interp(sampled_times, time_values, signal_values)
+
     return sampled_times.tolist(), sampled_values.tolist()
 
 
