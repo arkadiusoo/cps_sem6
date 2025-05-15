@@ -19,7 +19,7 @@ class Assignment3App(QWidget):
         controls_layout = QVBoxLayout()
 
         self.combo_signal_selector = QComboBox()
-        self.update_signal_selector()
+
         controls_layout.addWidget(QLabel("Wybierz sygnał z Zadania 1:"))
         controls_layout.addWidget(self.combo_signal_selector)
 
@@ -60,6 +60,7 @@ class Assignment3App(QWidget):
         main_layout.addWidget(self.list_results)
 
         self.setLayout(main_layout)
+        self.update_signal_selector()
 
     def update_signal_selector(self):
         self.combo_signal_selector.clear()
