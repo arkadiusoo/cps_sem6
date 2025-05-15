@@ -58,6 +58,7 @@ class MainWindow(QMainWindow):
             self.task3_widget.combo_signal_selector.clear()
             for signal in self.task3_widget.saved_signals:
                 self.task3_widget.combo_signal_selector.addItem(signal[0])
+                self.task3_widget.combo_secondary_signal.addItem(signal[0])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
