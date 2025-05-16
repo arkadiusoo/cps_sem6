@@ -54,9 +54,11 @@ class MainWindow(QMainWindow):
             for signal in self.task2_widget.saved_signals:
                 self.task2_widget.combo_signal_selector.addItem(signal[0])
         if index == 2:
-            self.task3_widget.saved_signals = self.task1_widget.saved_signals
+            combined_signals = self.task1_widget.saved_signals + self.task2_widget.quantized_signals
+            self.task3_widget.saved_signals = combined_signals
             self.task3_widget.combo_signal_selector.clear()
-            for signal in self.task3_widget.saved_signals:
+            self.task3_widget.combo_secondary_signal.clear()
+            for signal in combined_signals:
                 self.task3_widget.combo_signal_selector.addItem(signal[0])
                 self.task3_widget.combo_secondary_signal.addItem(signal[0])
 
