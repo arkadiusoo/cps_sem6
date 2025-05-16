@@ -37,6 +37,20 @@ class Assignment3App(QWidget):
         controls_layout.addWidget(QLabel("Wybierz operację:"))
         controls_layout.addWidget(self.combo_operation)
 
+        self.combo_correlation_method = QComboBox()
+        self.combo_correlation_method.addItems(["Liniowa", "Cyrkularna"])
+        controls_layout.addWidget(QLabel("Metoda korelacji:"))
+        controls_layout.addWidget(self.combo_correlation_method)
+
+        self.combo_filter_window = QComboBox()
+        self.combo_filter_window.addItems(["Prostokątne", "Hamming", "Hanning", "Blackman"])
+        controls_layout.addWidget(QLabel("Typ okna dla filtrowania:"))
+        controls_layout.addWidget(self.combo_filter_window)
+
+        self.btn_apply_filter = QPushButton("Zastosuj filtr do sygnału")
+        self.btn_apply_filter.clicked.connect(self.perform_operation)
+        controls_layout.addWidget(self.btn_apply_filter)
+
         self.btn_process = QPushButton("Wykonaj operację")
         self.btn_process.clicked.connect(self.perform_operation)
         controls_layout.addWidget(self.btn_process)
@@ -84,6 +98,7 @@ class Assignment3App(QWidget):
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
         ax.plot(t, y, label="Wynik operacji")
+        ax.legend()
         ax.set_title(label)
         ax.set_xlabel("Czas [s]")
         ax.set_ylabel("Amplituda")
