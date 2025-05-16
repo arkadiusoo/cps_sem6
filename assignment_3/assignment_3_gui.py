@@ -24,7 +24,8 @@ class Assignment3App(QWidget):
         controls_layout.addWidget(self.combo_signal_selector)
 
         self.combo_secondary_signal = QComboBox()
-        controls_layout.addWidget(QLabel("Wybierz drugi sygnał (jeśli dotyczy):"))
+        self.label_secondary_signal = QLabel("Wybierz drugi sygnał:")
+        controls_layout.addWidget(self.label_secondary_signal)
         controls_layout.addWidget(self.combo_secondary_signal)
 
         self.combo_operation = QComboBox()
@@ -39,12 +40,14 @@ class Assignment3App(QWidget):
 
         self.combo_correlation_method = QComboBox()
         self.combo_correlation_method.addItems(["Liniowa", "Cyrkularna"])
-        controls_layout.addWidget(QLabel("Metoda korelacji:"))
+        self.label_correlation_method = QLabel("Metoda korelacji:")
+        controls_layout.addWidget(self.label_correlation_method)
         controls_layout.addWidget(self.combo_correlation_method)
 
         self.combo_filter_window = QComboBox()
         self.combo_filter_window.addItems(["Prostokątne", "Hamming", "Hanning", "Blackman"])
-        controls_layout.addWidget(QLabel("Typ okna dla filtrowania:"))
+        self.label_filter_window = QLabel("Typ okna dla filtrowania:")
+        controls_layout.addWidget(self.label_filter_window)
         controls_layout.addWidget(self.combo_filter_window)
 
         self.btn_apply_filter = QPushButton("Zastosuj filtr do sygnału")
@@ -75,6 +78,8 @@ class Assignment3App(QWidget):
 
         self.setLayout(main_layout)
         self.update_signal_selector()
+        self.combo_operation.currentTextChanged.connect(self.on_operation_changed)
+        self.on_operation_changed()
 
     def update_signal_selector(self):
         self.combo_signal_selector.clear()
@@ -106,3 +111,22 @@ class Assignment3App(QWidget):
         canvas.draw()
         self.scroll_layout.addWidget(canvas)
         self.current_result = y
+
+    def on_operation_changed(self):
+        op = self.combo_operation.currentText()
+
+        is_correlation = "Korelacja" in op
+        is_filter = "Filtracja" in op
+        is_two_signal = "Splot" in op or is_correlation
+
+        self.combo_correlation_method.setVisible(is_correlation)
+        self.label_correlation_method.setVisible(is_correlation)
+
+        self.combo_filter_window.setVisible(is_filter)
+        self.label_filter_window.setVisible(is_filter)
+
+        self.combo_secondary_signal.setVisible(is_two_signal)
+        self.label_secondary_signal.setVisible(is_two_signal)
+
+        self.btn_apply_filter.setVisible(is_filter)
+        self.btn_process.setVisible(not is_filter)
