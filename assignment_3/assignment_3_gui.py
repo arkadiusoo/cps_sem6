@@ -6,6 +6,8 @@ from PyQt6.QtWidgets import (
 from assignment_1.plotting_utils import MatplotlibCanvas
 from assignment_3.correlation import (manual_correlation, library_correlation, correlation_via_convolution)
 from assignment_3.convolution import (manual_convolution, library_convolution)
+from assignment_3.filter_design import design_bandpass_fir_filter
+from assignment_3.filter_windows import get_window_function
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
         super().__init__()
@@ -140,6 +142,32 @@ class Assignment3App(QWidget):
 
             t_result = np.linspace(0, len(result) / 1000, len(result))
 
+        elif "Filtracja" in op:
+            # Determine window type from combo
+            window_name = self.combo_filter_window.currentText()
+            # Map Polish window names to English keys used by get_window_function
+            window_map = {
+                "Prostokątne": "rectangular",
+                "Hamming": "hamming",
+                "Hanning": "hanning",
+                "Blackman": "blackman"
+            }
+            window_key = window_map.get(window_name, "rectangular")
+            window_func = get_window_function(window_key, 51)
+            # Design filter (assuming bandpass parameters are fixed or can be adjusted)
+            # For example, let's assume passband between 0.1 and 0.3 normalized frequency
+            filter_coeffs = design_bandpass_fir_filter(numtaps=51, cutoff=(0.1, 0.3), window=window_func)
+            # Perform filtering via convolution
+            filtered_signal = np.convolve(x, filter_coeffs, mode='same')
+            label = f"{label_id} Filtracja – {window_name}"
+            t_result = np.array(t_x)
+            result = filtered_signal
+            # Store original signal for plotting both
+            self.results.append((label, t_result, result, np.array(x)))
+            self.list_results.addItem(label)
+            self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
+            return
+
         else:
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
             return
@@ -150,7 +178,7 @@ class Assignment3App(QWidget):
 
     def display_selected_result(self, item):
         index = self.list_results.row(item)
-        label, t, y = self.results[index]
+        data = self.results[index]
 
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
@@ -159,15 +187,28 @@ class Assignment3App(QWidget):
 
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
-        ax.plot(t, y, label="Wynik operacji")
-        # ax.legend()
-        ax.set_title(label)
-        ax.set_xlabel("Czas [s]")
-        ax.set_ylabel("Amplituda")
-        ax.grid()
+
+        if len(data) == 4:
+            label, t, filtered, original = data
+            ax.plot(t, original, label="Oryginalny sygnał")
+            ax.plot(t, filtered, label="Sygnał przefiltrowany")
+            ax.legend()
+            ax.set_title(label)
+            ax.set_xlabel("Czas [s]")
+            ax.set_ylabel("Amplituda")
+            ax.grid()
+        else:
+            label, t, y = data
+            ax.plot(t, y, label="Wynik operacji")
+            # ax.legend()
+            ax.set_title(label)
+            ax.set_xlabel("Czas [s]")
+            ax.set_ylabel("Amplituda")
+            ax.grid()
+
         canvas.draw()
         self.scroll_layout.addWidget(canvas)
-        self.current_result = y
+        self.current_result = data[-1]
 
     def on_operation_changed(self):
         op = self.combo_operation.currentText()
