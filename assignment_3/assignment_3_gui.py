@@ -6,8 +6,8 @@ from PyQt6.QtWidgets import (
 from assignment_1.plotting_utils import MatplotlibCanvas
 from assignment_3.correlation import (manual_correlation, library_correlation, correlation_via_convolution)
 from assignment_3.convolution import (manual_convolution, library_convolution)
-from assignment_3.filter_design import design_bandpass_fir_filter
-from assignment_3.filter_windows import get_window_function
+from assignment_3.filter_design import (design_lowpass_fir_filter, design_highpass_fir_filter, apply_filter)
+
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
         super().__init__()
@@ -162,45 +162,25 @@ class Assignment3App(QWidget):
 
         elif "Filtracja" in op:
 
-            from assignment_3.filter_design import (
-
-                design_lowpass_fir_filter,
-
-                design_highpass_fir_filter,
-
-                apply_filter
-
-            )
 
             window_name = self.combo_filter_window.currentText()
-
             window_type = window_name.lower()
-
             if window_type not in ["prostokątne", "hanning"]:
                 QMessageBox.information(self, "Info", f"Typ okna {window_name} nieobsługiwany w tej wersji.")
-
                 return
 
             # Normalizuj nazwę do wewnętrznej funkcji
-
             if window_type == "prostokątne":
                 window_type = "rectangular"
-
             # Pobierz sygnał i czas
-
             signal_values = np.array([pt[0] for pt in sig1])
-
             time_values = np.array([pt[1] for pt in sig1])
-
             if len(time_values) < 2:
                 QMessageBox.warning(self, "Błąd", "Brakuje danych czasowych do obliczenia częstotliwości próbkowania.")
-
                 return
 
             dt = time_values[1] - time_values[0]
-
             Fs = 1 / dt
-
             fc = self.spin_cutoff_freq.value()
             M = self.spin_filter_length.value()
             if M % 2 == 0:
@@ -208,15 +188,10 @@ class Assignment3App(QWidget):
                 return
 
             # Typ filtru (lowpass/highpass)
-
             filter_type = self.combo_filter_type.currentText().lower()
-
             if filter_type == "dolnoprzepustowy":
-
                 filter_coeffs = design_lowpass_fir_filter(Fs, fc, M, window_type)
-
             elif filter_type == "górnoprzepustowy":
-
                 filter_coeffs = design_highpass_fir_filter(Fs, fc, M, window_type)
 
             else:
@@ -226,19 +201,12 @@ class Assignment3App(QWidget):
                 return
 
             filtered_signal = apply_filter(signal_values, filter_coeffs)
-
             t_result = time_values[:len(filtered_signal)]
-
             label = f"{label_id} Filtracja – {window_name}, {filter_type}: {short1}"
-
             result = filtered_signal
-
             self.results.append((label, t_result, filtered_signal.tolist(), signal_values.tolist()))
-
             self.list_results.addItem(label)
-
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
-
             return
 
         else:
