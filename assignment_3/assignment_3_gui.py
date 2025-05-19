@@ -103,6 +103,9 @@ class Assignment3App(QWidget):
         name1, sig1, _, _, _ = self.saved_signals[idx1]
         name2, sig2, _, _, _ = self.saved_signals[idx2]
 
+        short1 = " ".join(name1.split()[:3])
+        short2 = " ".join(name2.split()[:3])
+
         x = np.array([pt[0] for pt in sig1])
         y = np.array([pt[0] for pt in sig2])
         t_x = np.array([pt[1] for pt in sig1])
@@ -111,31 +114,37 @@ class Assignment3App(QWidget):
         label = ""
 
         if "Splot" in op:
+            label_id = f"[{len(self.results)+1}]"
             if "ręczny" in op:
                 result = np.convolve(x, y)
-                label = f"Splot ręczny: {name1} * {name2}"
+                label = f"{label_id} Splot ręczny: {short1} * {short2}"
             else:
                 result = convolve(x, y, mode='full')
-                label = f"Splot (scipy): {name1} * {name2}"
+                label = f"{label_id} Splot (scipy): {short1} * {short2}"
             t_result = np.linspace(t_x[0], t_x[0] + len(result) / 1000, len(result))
 
         elif "Korelacja" in op:
             mode = self.combo_correlation_method.currentText()
+            label_id = f"[{len(self.results)+1}]"
             if "ręczna" in op:
                 if mode == "Liniowa":
                     result = np.correlate(x, y, mode='full')
-                    label = f"Korelacja liniowa (ręczna): {name1} ⊛ {name2}"
+                    label = f"{label_id} Korelacja liniowa (ręczna): {short1} ⊛ {short2}"
                 else:
                     # Korelacja cyrkularna ręczna
                     N = len(x)
                     y_circ = np.roll(y, N//2)
                     result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y_circ))).real
-                    label = f"Korelacja cyrkularna (ręczna): {name1} ⊛ {name2}"
+                    label = f"{label_id} Korelacja cyrkularna (ręczna): {short1} ⊛ {short2}"
                 t_result = np.linspace(0, len(result) / 1000, len(result))
             else:
-                result = correlate(x, y, mode='full')
-                label = f"Korelacja (scipy): {name1} ⊛ {name2}"
-                t_result = np.linspace(0, len(result) / 1000, len(result))
+                if mode == "Liniowa":
+                    result = correlate(x, y, mode='full')
+                    label = f"[{len(self.results) + 1}] Korelacja liniowa (scipy): {short1} ⊛ {short2}"
+                else:
+                    # Korelacja cyrkularna z użyciem FFT (biblioteczna)
+                    result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y))).real
+                    label = f"[{len(self.results) + 1}] Korelacja cyrkularna (FFT): {short1} ⊛ {short2}"
 
         else:
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
