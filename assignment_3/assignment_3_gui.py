@@ -52,10 +52,6 @@ class Assignment3App(QWidget):
         controls_layout.addWidget(self.label_filter_window)
         controls_layout.addWidget(self.combo_filter_window)
 
-        self.btn_apply_filter = QPushButton("Zastosuj filtr do sygnału")
-        self.btn_apply_filter.clicked.connect(self.perform_operation)
-        controls_layout.addWidget(self.btn_apply_filter)
-
         self.btn_process = QPushButton("Wykonaj operację")
         self.btn_process.clicked.connect(self.perform_operation)
         controls_layout.addWidget(self.btn_process)
@@ -142,25 +138,25 @@ class Assignment3App(QWidget):
             t_result = np.linspace(0, len(result) / 1000, len(result))
 
         elif "Filtracja" in op:
-            # Determine window type from combo
             window_name = self.combo_filter_window.currentText()
-            if "Prostokątne" in window_name:
-                filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type="rectangular")
-                filtered_signal = np.convolve(x, filter_coeffs, mode='valid')
-                start_index = (len(t_x) - len(filtered_signal)) // 2
-                t_result = np.array(t_x[start_index:start_index + len(filtered_signal)])
-                label = f"{label_id} Filtracja – {window_name}"
-                result = filtered_signal
-            elif "Hanning" in window_name:
-                filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type="hanning")
-                filtered_signal = np.convolve(x, filter_coeffs, mode='valid')
-                start_index = (len(t_x) - len(filtered_signal)) // 2
-                t_result = np.array(t_x[start_index:start_index + len(filtered_signal)])
-                label = f"{label_id} Filtracja – {window_name}"
-                result = filtered_signal
-            else:
-                QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
-                return
+            window_type = window_name.lower()
+
+            # Użycie rzeczywistego sygnału z wybranego pola
+            signal_values = np.array([pt[0] for pt in sig1])
+            time_values = np.array([pt[1] for pt in sig1])
+
+            filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type=window_type)
+            filtered_signal = np.convolve(signal_values, filter_coeffs, mode='valid')
+
+            start_index = (len(time_values) - len(filtered_signal)) // 2
+            t_result = np.array(time_values[start_index:start_index + len(filtered_signal)])
+            label = f"{label_id} Filtracja – {window_name}"
+            result = filtered_signal
+
+            self.results.append((label, t_result, filtered_signal.tolist(), signal_values.tolist()))
+            self.list_results.addItem(label)
+            self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
+            return
 
         else:
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
@@ -232,5 +228,4 @@ class Assignment3App(QWidget):
         self.combo_secondary_signal.setVisible(is_two_signal)
         self.label_secondary_signal.setVisible(is_two_signal)
 
-        self.btn_apply_filter.setVisible(is_filter)
-        self.btn_process.setVisible(not is_filter)
+        self.btn_process.setVisible(True)
