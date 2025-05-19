@@ -1,5 +1,10 @@
 import numpy as np
 
+from assignment_3.convolution import (manual_convolution)
+
+def correlation_via_convolution(h, x):
+    h_reversed = h[::-1]
+    return manual_convolution(x, h_reversed)
 
 def manual_correlation(x, y, mode="linear"):
 

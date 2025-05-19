@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 )
 
 from assignment_1.plotting_utils import MatplotlibCanvas
-from assignment_3.correlation import (manual_correlation, library_correlation)
+from assignment_3.correlation import (manual_correlation, library_correlation, correlation_via_convolution)
 from assignment_3.convolution import (manual_convolution, library_convolution)
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
@@ -32,7 +32,7 @@ class Assignment3App(QWidget):
         self.combo_operation = QComboBox()
         self.combo_operation.addItems([
             "Splot – ręczny", "Splot – biblioteczny",
-            "Korelacja – ręczna", "Korelacja – biblioteczna",
+            "Korelacja – ręczna", "Korelacja przez splot - ręczna","Korelacja – biblioteczna",
             "Filtracja – prostokątne okno",
             "Filtracja – Hamming", "Filtracja – Hanning", "Filtracja – Blackman"
         ])
@@ -130,6 +130,10 @@ class Assignment3App(QWidget):
             if "ręczna" in op:
                 result = manual_correlation(x, y, mode=mode_eng)
                 label = f"{label_id} Korelacja {mode} ręczna: {short1} ⊛ {short2}"
+
+            elif "przez splot" in op:
+                result = correlation_via_convolution(x, y)
+                label = f"{label_id} Korelacja poprzez splot ręczna: {short1} ⊛ {short2}"
             else:
                 result = library_correlation(x, y, mode=mode_eng)
                 label = f"{label_id} Korelacja {mode} biblioteczna: {short1} ⊛ {short2}"
@@ -169,11 +173,12 @@ class Assignment3App(QWidget):
         op = self.combo_operation.currentText()
 
         is_correlation = "Korelacja" in op
+        is_correlation_by_convolution = "przez splot" in op
         is_filter = "Filtracja" in op
         is_two_signal = "Splot" in op or is_correlation
 
-        self.combo_correlation_method.setVisible(is_correlation)
-        self.label_correlation_method.setVisible(is_correlation)
+        self.combo_correlation_method.setVisible((is_correlation and not is_correlation_by_convolution) or (is_correlation_by_convolution and not is_correlation))
+        self.label_correlation_method.setVisible((is_correlation and not is_correlation_by_convolution) or (is_correlation_by_convolution and not is_correlation))
 
         self.combo_filter_window.setVisible(is_filter)
         self.label_filter_window.setVisible(is_filter)
