@@ -60,3 +60,24 @@ This task extends the first assignment by introducing signal digitization and re
   - ENOB (Effective Number of Bits)
 - **Signal info popup** on double-click with full analysis
 
+---
+## Assignment 3 – Convolution, Correlation, and Filtering
+
+This task focuses on signal processing operations such as convolution, correlation, and FIR filtering.
+
+### Implemented Features
+
+- **Manual and library-based convolution** of two arbitrary-length discrete signals
+- **Cross-correlation**:
+  - Manual (linear and circular)
+  - Via convolution
+  - Using NumPy
+- **FIR filter design** (window method):
+  - High-pass filters (variant F2)
+  - Hanning window (variant O2)
+- **Filter application via convolution**
+- **Integrated GUI (PyQt6)**:
+  - Signal selection from Assignment 1
+  - Operation selection and parameter input
+  - Dynamic plotting with matplotlib
+  - Result history with comparison
