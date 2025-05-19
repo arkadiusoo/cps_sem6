@@ -89,7 +89,61 @@ class Assignment3App(QWidget):
             self.combo_secondary_signal.addItem(signal_info[0])
 
     def perform_operation(self):
-        QMessageBox.information(self, "Info", "W tej wersji szkieletu operacja nie została jeszcze zaimplementowana.")
+        import numpy as np
+        from scipy.signal import convolve, correlate
+
+        op = self.combo_operation.currentText()
+        idx1 = self.combo_signal_selector.currentIndex()
+        idx2 = self.combo_secondary_signal.currentIndex()
+
+        if idx1 < 0 or idx2 < 0 or idx1 >= len(self.saved_signals) or idx2 >= len(self.saved_signals):
+            QMessageBox.warning(self, "Błąd", "Niepoprawny wybór sygnałów.")
+            return
+
+        name1, sig1, _, _, _ = self.saved_signals[idx1]
+        name2, sig2, _, _, _ = self.saved_signals[idx2]
+
+        x = np.array([pt[0] for pt in sig1])
+        y = np.array([pt[0] for pt in sig2])
+        t_x = np.array([pt[1] for pt in sig1])
+
+        result = []
+        label = ""
+
+        if "Splot" in op:
+            if "ręczny" in op:
+                result = np.convolve(x, y)
+                label = f"Splot ręczny: {name1} * {name2}"
+            else:
+                result = convolve(x, y, mode='full')
+                label = f"Splot (scipy): {name1} * {name2}"
+            t_result = np.linspace(t_x[0], t_x[0] + len(result) / 1000, len(result))
+
+        elif "Korelacja" in op:
+            mode = self.combo_correlation_method.currentText()
+            if "ręczna" in op:
+                if mode == "Liniowa":
+                    result = np.correlate(x, y, mode='full')
+                    label = f"Korelacja liniowa (ręczna): {name1} ⊛ {name2}"
+                else:
+                    # Korelacja cyrkularna ręczna
+                    N = len(x)
+                    y_circ = np.roll(y, N//2)
+                    result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y_circ))).real
+                    label = f"Korelacja cyrkularna (ręczna): {name1} ⊛ {name2}"
+                t_result = np.linspace(0, len(result) / 1000, len(result))
+            else:
+                result = correlate(x, y, mode='full')
+                label = f"Korelacja (scipy): {name1} ⊛ {name2}"
+                t_result = np.linspace(0, len(result) / 1000, len(result))
+
+        else:
+            QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
+            return
+
+        self.results.append((label, t_result, result.tolist()))
+        self.list_results.addItem(label)
+        self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
 
     def display_selected_result(self, item):
         index = self.list_results.row(item)
