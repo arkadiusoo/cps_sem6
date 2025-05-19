@@ -2,9 +2,10 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QPushButton, QVBoxLayout,
     QHBoxLayout, QListWidget, QScrollArea, QMessageBox
 )
-from PyQt6.QtCore import Qt
-from assignment_1.plotting_utils import MatplotlibCanvas
 
+from assignment_1.plotting_utils import MatplotlibCanvas
+from assignment_3.correlation import (manual_correlation, library_correlation)
+from assignment_3.convolution import (manual_convolution, library_convolution)
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
         super().__init__()
@@ -89,7 +90,59 @@ class Assignment3App(QWidget):
             self.combo_secondary_signal.addItem(signal_info[0])
 
     def perform_operation(self):
-        QMessageBox.information(self, "Info", "W tej wersji szkieletu operacja nie została jeszcze zaimplementowana.")
+        import numpy as np
+
+        op = self.combo_operation.currentText()
+        idx1 = self.combo_signal_selector.currentIndex()
+        idx2 = self.combo_secondary_signal.currentIndex()
+
+        if idx1 < 0 or idx2 < 0 or idx1 >= len(self.saved_signals) or idx2 >= len(self.saved_signals):
+            QMessageBox.warning(self, "Błąd", "Niepoprawny wybór sygnałów.")
+            return
+
+        name1, sig1, _, _, _ = self.saved_signals[idx1]
+        name2, sig2, _, _, _ = self.saved_signals[idx2]
+
+        short1 = " ".join(name1.split()[:3])
+        short2 = " ".join(name2.split()[:3])
+
+        x = [pt[0] for pt in sig1]
+        y = [pt[0] for pt in sig2]
+        t_x = [pt[1] for pt in sig1]
+
+        result = []
+        label = ""
+        label_id = f"[{len(self.results) + 1}]"
+
+        if "Splot" in op:
+            if "ręczny" in op:
+                result = manual_convolution(x, y)
+                label = f"{label_id} Splot ręczny: {short1} * {short2}"
+            else:
+                result = library_convolution(x, y)
+                label = f"{label_id} Splot biblioteczny: {short1} * {short2}"
+            t_result = np.linspace(t_x[0], t_x[0] + len(result) / 1000, len(result))
+
+        elif "Korelacja" in op:
+            mode = self.combo_correlation_method.currentText().lower()  # 'liniowa' or 'cyrkularna'
+            mode_eng = "linear" if mode == "liniowa" else "circular"
+
+            if "ręczna" in op:
+                result = manual_correlation(x, y, mode=mode_eng)
+                label = f"{label_id} Korelacja {mode} ręczna: {short1} ⊛ {short2}"
+            else:
+                result = library_correlation(x, y, mode=mode_eng)
+                label = f"{label_id} Korelacja {mode} biblioteczna: {short1} ⊛ {short2}"
+
+            t_result = np.linspace(0, len(result) / 1000, len(result))
+
+        else:
+            QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
+            return
+
+        self.results.append((label, t_result, result))
+        self.list_results.addItem(label)
+        self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
 
     def display_selected_result(self, item):
         index = self.list_results.row(item)
@@ -103,7 +156,7 @@ class Assignment3App(QWidget):
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
         ax.plot(t, y, label="Wynik operacji")
-        ax.legend()
+        # ax.legend()
         ax.set_title(label)
         ax.set_xlabel("Czas [s]")
         ax.set_ylabel("Amplituda")
