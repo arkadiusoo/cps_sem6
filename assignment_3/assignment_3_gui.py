@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QPushButton, QVBoxLayout,
-    QHBoxLayout, QListWidget, QScrollArea, QMessageBox
+    QHBoxLayout, QListWidget, QScrollArea, QMessageBox, QSpinBox
 )
 
 from assignment_1.plotting_utils import MatplotlibCanvas
@@ -51,6 +51,22 @@ class Assignment3App(QWidget):
         self.label_filter_type = QLabel("Typ filtru:")
         controls_layout.addWidget(self.label_filter_type)
         controls_layout.addWidget(self.combo_filter_type)
+
+        self.label_filter_length = QLabel("Liczba współczynników (M):")
+        self.spin_filter_length = QSpinBox()
+        self.spin_filter_length.setRange(11, 201)
+        self.spin_filter_length.setSingleStep(2)
+        self.spin_filter_length.setValue(51)
+        controls_layout.addWidget(self.label_filter_length)
+        controls_layout.addWidget(self.spin_filter_length)
+
+        self.label_cutoff_freq = QLabel("Częstotliwość odcięcia [Hz]:")
+        self.spin_cutoff_freq = QSpinBox()
+        self.spin_cutoff_freq.setRange(10, 500)
+        self.spin_cutoff_freq.setSingleStep(10)
+        self.spin_cutoff_freq.setValue(200)
+        controls_layout.addWidget(self.label_cutoff_freq)
+        controls_layout.addWidget(self.spin_cutoff_freq)
 
         self.combo_filter_window = QComboBox()
         self.combo_filter_window.addItems(["Prostokątne", "Hamming", "Hanning", "Blackman"])
@@ -185,9 +201,11 @@ class Assignment3App(QWidget):
 
             Fs = 1 / dt
 
-            fc = 200  # stała częstotliwość odcięcia (Hz)
-
-            M = 51  # stała liczba współczynników
+            fc = self.spin_cutoff_freq.value()
+            M = self.spin_filter_length.value()
+            if M % 2 == 0:
+                QMessageBox.warning(self, "Błąd", "Liczba współczynników ma być nieparzysta.")
+                return
 
             # Typ filtru (lowpass/highpass)
 
@@ -297,3 +315,7 @@ class Assignment3App(QWidget):
         self.label_filter_type.setVisible(is_filter)
 
         self.btn_process.setVisible(True)
+        self.spin_filter_length.setVisible(is_filter)
+        self.label_filter_length.setVisible(is_filter)
+        self.spin_cutoff_freq.setVisible(is_filter)
+        self.label_cutoff_freq.setVisible(is_filter)
