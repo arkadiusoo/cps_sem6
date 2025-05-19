@@ -46,6 +46,12 @@ class Assignment3App(QWidget):
         controls_layout.addWidget(self.label_correlation_method)
         controls_layout.addWidget(self.combo_correlation_method)
 
+        self.combo_filter_type = QComboBox()
+        self.combo_filter_type.addItems(["Dolnoprzepustowy", "Górnoprzepustowy"])
+        self.label_filter_type = QLabel("Typ filtru:")
+        controls_layout.addWidget(self.label_filter_type)
+        controls_layout.addWidget(self.combo_filter_type)
+
         self.combo_filter_window = QComboBox()
         self.combo_filter_window.addItems(["Prostokątne", "Hamming", "Hanning", "Blackman"])
         self.label_filter_window = QLabel("Typ okna dla filtrowania:")
@@ -137,38 +143,84 @@ class Assignment3App(QWidget):
 
             t_result = np.linspace(0, len(result) / 1000, len(result))
 
+
         elif "Filtracja" in op:
+
+            from assignment_3.filter_design import (
+
+                design_lowpass_fir_filter,
+
+                design_highpass_fir_filter,
+
+                apply_filter
+
+            )
+
             window_name = self.combo_filter_window.currentText()
+
             window_type = window_name.lower()
-            if window_type == "blackman" or window_type == "hamming":
-                QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
+
+            if window_type not in ["prostokątne", "hanning"]:
+                QMessageBox.information(self, "Info", f"Typ okna {window_name} nieobsługiwany w tej wersji.")
+
                 return
-            # Get selected signal
+
+            # Normalizuj nazwę do wewnętrznej funkcji
+
+            if window_type == "prostokątne":
+                window_type = "rectangular"
+
+            # Pobierz sygnał i czas
+
             signal_values = np.array([pt[0] for pt in sig1])
+
             time_values = np.array([pt[1] for pt in sig1])
 
-            # Calculate sampling frequency from time_values
             if len(time_values) < 2:
                 QMessageBox.warning(self, "Błąd", "Brakuje danych czasowych do obliczenia częstotliwości próbkowania.")
+
                 return
+
             dt = time_values[1] - time_values[0]
+
             Fs = 1 / dt
 
-            # Define passband frequencies and filter length (can be adapted later)
-            f1, f2 = 100, 300
-            M = 51
+            fc = 200  # stała częstotliwość odcięcia (Hz)
 
-            # Design filter and apply
-            filter_coeffs = design_bandpass_fir_filter(Fs=Fs, f1=f1, f2=f2, M=M, window_type=window_type)
-            filtered_signal = np.convolve(signal_values, filter_coeffs, mode='same')
+            M = 51  # stała liczba współczynników
+
+            # Typ filtru (lowpass/highpass)
+
+            filter_type = self.combo_filter_type.currentText().lower()
+
+            if filter_type == "dolnoprzepustowy":
+
+                filter_coeffs = design_lowpass_fir_filter(Fs, fc, M, window_type)
+
+            elif filter_type == "górnoprzepustowy":
+
+                filter_coeffs = design_highpass_fir_filter(Fs, fc, M, window_type)
+
+            else:
+
+                QMessageBox.warning(self, "Błąd", "Nieznany typ filtru.")
+
+                return
+
+            filtered_signal = apply_filter(signal_values, filter_coeffs)
 
             t_result = time_values[:len(filtered_signal)]
-            label = f"{label_id} Filtracja – {window_name}: {short1}"
+
+            label = f"{label_id} Filtracja – {window_name}, {filter_type}: {short1}"
+
             result = filtered_signal
 
             self.results.append((label, t_result, filtered_signal.tolist(), signal_values.tolist()))
+
             self.list_results.addItem(label)
+
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
+
             return
 
         else:
@@ -240,5 +292,8 @@ class Assignment3App(QWidget):
 
         self.combo_secondary_signal.setVisible(is_two_signal)
         self.label_secondary_signal.setVisible(is_two_signal)
+
+        self.combo_filter_type.setVisible(is_filter)
+        self.label_filter_type.setVisible(is_filter)
 
         self.btn_process.setVisible(True)
