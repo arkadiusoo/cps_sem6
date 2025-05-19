@@ -20,8 +20,10 @@ def design_bandpass_fir_filter(Fs, f1, f2, M, window_type='hanning'):
     m = M // 2
 
     # Ideal bandpass impulse response
-    h = (np.sin(w2 * (n - m)) - np.sin(w1 * (n - m))) / (np.pi * (n - m))
-    h[m] = (w2 - w1) / np.pi  # handle division by zero at center
+    h = np.zeros(M)
+    h[m] = (w2 - w1) / np.pi
+    k = n - m
+    h = np.where(k == 0, h[m], (np.sin(w2 * k) - np.sin(w1 * k)) / (np.pi * k))
 
     if window_type == 'hanning':
         window = hanning_window(M)

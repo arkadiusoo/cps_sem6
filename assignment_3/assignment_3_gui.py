@@ -156,11 +156,12 @@ class Assignment3App(QWidget):
             window_func = get_window_function(window_key, 51)
             # Design filter (assuming bandpass parameters are fixed or can be adjusted)
             # For example, let's assume passband between 0.1 and 0.3 normalized frequency
-            filter_coeffs = design_bandpass_fir_filter(numtaps=51, cutoff=(0.1, 0.3), window=window_func)
+            filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type="hanning")
             # Perform filtering via convolution
-            filtered_signal = np.convolve(x, filter_coeffs, mode='same')
+            filtered_signal = np.convolve(x, filter_coeffs, mode='valid')
+            start_index = (len(t_x) - len(filtered_signal)) // 2
+            t_result = np.array(t_x[start_index:start_index + len(filtered_signal)])
             label = f"{label_id} Filtracja – {window_name}"
-            t_result = np.array(t_x)
             result = filtered_signal
             # Store original signal for plotting both
             self.results.append((label, t_result, result, np.array(x)))
@@ -190,6 +191,12 @@ class Assignment3App(QWidget):
 
         if len(data) == 4:
             label, t, filtered, original = data
+            # Make sure the arrays have the same length
+            min_len = min(len(t), len(original), len(filtered))
+            t = t[:min_len]
+            original = original[:min_len]
+            filtered = filtered[:min_len]
+        
             ax.plot(t, original, label="Oryginalny sygnał")
             ax.plot(t, filtered, label="Sygnał przefiltrowany")
             ax.legend()
@@ -199,8 +206,13 @@ class Assignment3App(QWidget):
             ax.grid()
         else:
             label, t, y = data
+            # Make sure the arrays have the same length
+            min_len = min(len(t), len(y))
+            t = t[:min_len]
+            y = y[:min_len]
+        
             ax.plot(t, y, label="Wynik operacji")
-            # ax.legend()
+            ax.legend()
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
