@@ -145,6 +145,7 @@ class Assignment3App(QWidget):
                     # Korelacja cyrkularna z użyciem FFT (biblioteczna)
                     result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y))).real
                     label = f"[{len(self.results) + 1}] Korelacja cyrkularna (FFT): {short1} ⊛ {short2}"
+                t_result = np.linspace(0, len(result) / 1000, len(result))
 
         else:
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
@@ -166,7 +167,7 @@ class Assignment3App(QWidget):
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
         ax.plot(t, y, label="Wynik operacji")
-        ax.legend()
+        # ax.legend()
         ax.set_title(label)
         ax.set_xlabel("Czas [s]")
         ax.set_ylabel("Amplituda")
