@@ -140,17 +140,30 @@ class Assignment3App(QWidget):
         elif "Filtracja" in op:
             window_name = self.combo_filter_window.currentText()
             window_type = window_name.lower()
-
-            # Użycie rzeczywistego sygnału z wybranego pola
+            if window_type == "blackman" or window_type == "hamming":
+                QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
+                return
+            # Get selected signal
             signal_values = np.array([pt[0] for pt in sig1])
             time_values = np.array([pt[1] for pt in sig1])
 
-            filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type=window_type)
-            filtered_signal = np.convolve(signal_values, filter_coeffs, mode='valid')
+            # Calculate sampling frequency from time_values
+            if len(time_values) < 2:
+                QMessageBox.warning(self, "Błąd", "Brakuje danych czasowych do obliczenia częstotliwości próbkowania.")
+                return
+            dt = time_values[1] - time_values[0]
+            Fs = 1 / dt
 
-            start_index = (len(time_values) - len(filtered_signal)) // 2
-            t_result = np.array(time_values[start_index:start_index + len(filtered_signal)])
-            label = f"{label_id} Filtracja – {window_name}"
+            # Define passband frequencies and filter length (can be adapted later)
+            f1, f2 = 100, 300
+            M = 51
+
+            # Design filter and apply
+            filter_coeffs = design_bandpass_fir_filter(Fs=Fs, f1=f1, f2=f2, M=M, window_type=window_type)
+            filtered_signal = np.convolve(signal_values, filter_coeffs, mode='same')
+
+            t_result = time_values[:len(filtered_signal)]
+            label = f"{label_id} Filtracja – {window_name}: {short1}"
             result = filtered_signal
 
             self.results.append((label, t_result, filtered_signal.tolist(), signal_values.tolist()))
