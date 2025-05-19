@@ -35,8 +35,7 @@ class Assignment3App(QWidget):
         self.combo_operation.addItems([
             "Splot – ręczny", "Splot – biblioteczny",
             "Korelacja – ręczna", "Korelacja przez splot - ręczna","Korelacja – biblioteczna",
-            "Filtracja – prostokątne okno",
-            "Filtracja – Hamming", "Filtracja – Hanning", "Filtracja – Blackman"
+            "Filtracja"
         ])
         controls_layout.addWidget(QLabel("Wybierz operację:"))
         controls_layout.addWidget(self.combo_operation)
@@ -145,29 +144,23 @@ class Assignment3App(QWidget):
         elif "Filtracja" in op:
             # Determine window type from combo
             window_name = self.combo_filter_window.currentText()
-            # Map Polish window names to English keys used by get_window_function
-            window_map = {
-                "Prostokątne": "rectangular",
-                "Hamming": "hamming",
-                "Hanning": "hanning",
-                "Blackman": "blackman"
-            }
-            window_key = window_map.get(window_name, "rectangular")
-            window_func = get_window_function(window_key, 51)
-            # Design filter (assuming bandpass parameters are fixed or can be adjusted)
-            # For example, let's assume passband between 0.1 and 0.3 normalized frequency
-            filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type="hanning")
-            # Perform filtering via convolution
-            filtered_signal = np.convolve(x, filter_coeffs, mode='valid')
-            start_index = (len(t_x) - len(filtered_signal)) // 2
-            t_result = np.array(t_x[start_index:start_index + len(filtered_signal)])
-            label = f"{label_id} Filtracja – {window_name}"
-            result = filtered_signal
-            # Store original signal for plotting both
-            self.results.append((label, t_result, result, np.array(x)))
-            self.list_results.addItem(label)
-            self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
-            return
+            if "Prostokątne" in window_name:
+                filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type="rectangular")
+                filtered_signal = np.convolve(x, filter_coeffs, mode='valid')
+                start_index = (len(t_x) - len(filtered_signal)) // 2
+                t_result = np.array(t_x[start_index:start_index + len(filtered_signal)])
+                label = f"{label_id} Filtracja – {window_name}"
+                result = filtered_signal
+            elif "Hanning" in window_name:
+                filter_coeffs = design_bandpass_fir_filter(Fs=1000, f1=100, f2=300, M=51, window_type="hanning")
+                filtered_signal = np.convolve(x, filter_coeffs, mode='valid')
+                start_index = (len(t_x) - len(filtered_signal)) // 2
+                t_result = np.array(t_x[start_index:start_index + len(filtered_signal)])
+                label = f"{label_id} Filtracja – {window_name}"
+                result = filtered_signal
+            else:
+                QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
+                return
 
         else:
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
@@ -196,7 +189,7 @@ class Assignment3App(QWidget):
             t = t[:min_len]
             original = original[:min_len]
             filtered = filtered[:min_len]
-        
+
             ax.plot(t, original, label="Oryginalny sygnał")
             ax.plot(t, filtered, label="Sygnał przefiltrowany")
             ax.legend()
@@ -210,7 +203,7 @@ class Assignment3App(QWidget):
             min_len = min(len(t), len(y))
             t = t[:min_len]
             y = y[:min_len]
-        
+
             ax.plot(t, y, label="Wynik operacji")
             ax.legend()
             ax.set_title(label)

@@ -1,5 +1,5 @@
 import numpy as np
-from assignment_3.filter_windows import hanning_window
+from assignment_3.filter_windows import (hanning_window, rectangular_window)
 
 def design_bandpass_fir_filter(Fs, f1, f2, M, window_type='hanning'):
     """
@@ -27,7 +27,9 @@ def design_bandpass_fir_filter(Fs, f1, f2, M, window_type='hanning'):
 
     if window_type == 'hanning':
         window = hanning_window(M)
+    elif window_type == "recnatgular":
+        window = rectangular_window(M)
     else:
-        window = np.ones(M)
+        return 0
 
     return h * window
