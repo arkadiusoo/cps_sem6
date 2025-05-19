@@ -2,9 +2,10 @@ from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QPushButton, QVBoxLayout,
     QHBoxLayout, QListWidget, QScrollArea, QMessageBox
 )
-from PyQt6.QtCore import Qt
-from assignment_1.plotting_utils import MatplotlibCanvas
 
+from assignment_1.plotting_utils import MatplotlibCanvas
+from assignment_3.correlation import (manual_correlation, library_correlation)
+from assignment_3.convolution import (manual_convolution, library_convolution)
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
         super().__init__()
@@ -90,7 +91,6 @@ class Assignment3App(QWidget):
 
     def perform_operation(self):
         import numpy as np
-        from scipy.signal import convolve, correlate
 
         op = self.combo_operation.currentText()
         idx1 = self.combo_signal_selector.currentIndex()
@@ -106,52 +106,41 @@ class Assignment3App(QWidget):
         short1 = " ".join(name1.split()[:3])
         short2 = " ".join(name2.split()[:3])
 
-        x = np.array([pt[0] for pt in sig1])
-        y = np.array([pt[0] for pt in sig2])
-        t_x = np.array([pt[1] for pt in sig1])
+        x = [pt[0] for pt in sig1]
+        y = [pt[0] for pt in sig2]
+        t_x = [pt[1] for pt in sig1]
 
         result = []
         label = ""
+        label_id = f"[{len(self.results) + 1}]"
 
         if "Splot" in op:
-            label_id = f"[{len(self.results)+1}]"
             if "ręczny" in op:
-                result = np.convolve(x, y)
+                result = manual_convolution(x, y)
                 label = f"{label_id} Splot ręczny: {short1} * {short2}"
             else:
-                result = convolve(x, y, mode='full')
-                label = f"{label_id} Splot (scipy): {short1} * {short2}"
+                result = library_convolution(x, y)
+                label = f"{label_id} Splot biblioteczny: {short1} * {short2}"
             t_result = np.linspace(t_x[0], t_x[0] + len(result) / 1000, len(result))
 
         elif "Korelacja" in op:
-            mode = self.combo_correlation_method.currentText()
-            label_id = f"[{len(self.results)+1}]"
+            mode = self.combo_correlation_method.currentText().lower()  # 'liniowa' or 'cyrkularna'
+            mode_eng = "linear" if mode == "liniowa" else "circular"
+
             if "ręczna" in op:
-                if mode == "Liniowa":
-                    result = np.correlate(x, y, mode='full')
-                    label = f"{label_id} Korelacja liniowa (ręczna): {short1} ⊛ {short2}"
-                else:
-                    # Korelacja cyrkularna ręczna
-                    N = len(x)
-                    y_circ = np.roll(y, N//2)
-                    result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y_circ))).real
-                    label = f"{label_id} Korelacja cyrkularna (ręczna): {short1} ⊛ {short2}"
-                t_result = np.linspace(0, len(result) / 1000, len(result))
+                result = manual_correlation(x, y, mode=mode_eng)
+                label = f"{label_id} Korelacja {mode} ręczna: {short1} ⊛ {short2}"
             else:
-                if mode == "Liniowa":
-                    result = correlate(x, y, mode='full')
-                    label = f"[{len(self.results) + 1}] Korelacja liniowa (scipy): {short1} ⊛ {short2}"
-                else:
-                    # Korelacja cyrkularna z użyciem FFT (biblioteczna)
-                    result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y))).real
-                    label = f"[{len(self.results) + 1}] Korelacja cyrkularna (FFT): {short1} ⊛ {short2}"
-                t_result = np.linspace(0, len(result) / 1000, len(result))
+                result = library_correlation(x, y, mode=mode_eng)
+                label = f"{label_id} Korelacja {mode} biblioteczna: {short1} ⊛ {short2}"
+
+            t_result = np.linspace(0, len(result) / 1000, len(result))
 
         else:
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
             return
 
-        self.results.append((label, t_result, result.tolist()))
+        self.results.append((label, t_result, result))
         self.list_results.addItem(label)
         self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
 
