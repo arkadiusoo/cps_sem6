@@ -1,27 +1,42 @@
 import numpy as np
 
+from assignment_3.convolution import (manual_convolution)
+
+def correlation_via_convolution(h, x):
+    h_reversed = h[::-1]
+    return manual_convolution(x, h_reversed)
 
 def manual_correlation(x, y, mode="linear"):
-    """
-    Computes correlation R_xy[k] = sum_n x[n] * y[n - k]
-    mode: 'linear' or 'circular'
-    """
 
-    x = np.array(x)
-    y = np.array(y)
+    N = len(x)
+    M = len(y)
 
-    if mode == "circular":
-        N = max(len(x), len(y))
-        x = np.pad(x, (0, N - len(x)), mode='constant')
-        y = np.pad(y, (0, N - len(y)), mode='constant')
-        # FFT-based circular correlation: IFFT(FFT(x) * conj(FFT(y)))
-        result = np.fft.ifft(np.fft.fft(x) * np.conj(np.fft.fft(y))).real
-    elif mode == "linear":
-        result = np.correlate(x, y, mode='full')
+    if mode == "linear":
+        # Korelacja liniowa: przesuwanie y względem x, odwrotnie niż w splocie
+        result = []
+        for n in range(N + M - 1):
+            acc = 0.0
+            for k in range(M):
+                if 0 <= n - k < N:
+                    acc += y[k] * x[n - k]
+            result.append(acc)
+        return result
+
+    elif mode == "circular":
+        # Korelacja cyrkularna: oba sygnały muszą mieć tę samą długość
+        L = max(N, M)
+        x_padded = x + [0] * (L - N)
+        y_padded = y + [0] * (L - M)
+        result = []
+        for n in range(L):
+            acc = 0.0
+            for k in range(L):
+                acc += y_padded[k] * x_padded[(n - k) % L]
+            result.append(acc)
+        return result
+
     else:
         raise ValueError("Invalid mode. Use 'linear' or 'circular'.")
-
-    return result.tolist()
 
 
 def library_correlation(x, y, mode="linear"):
