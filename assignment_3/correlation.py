@@ -12,7 +12,7 @@ def manual_correlation(x, y, mode="linear"):
     M = len(y)
 
     if mode == "linear":
-        # Korelacja liniowa: przesuwanie y względem x, odwrotnie niż w splocie
+
         result = []
         for n in range(N + M - 1):
             acc = 0.0
@@ -23,7 +23,7 @@ def manual_correlation(x, y, mode="linear"):
         return result
 
     elif mode == "circular":
-        # Korelacja cyrkularna: oba sygnały muszą mieć tę samą długość
+
         L = max(N, M)
         x_padded = x + [0] * (L - N)
         y_padded = y + [0] * (L - M)
@@ -40,10 +40,7 @@ def manual_correlation(x, y, mode="linear"):
 
 
 def library_correlation(x, y, mode="linear"):
-    """
-    Computes correlation using numpy built-in correlation.
-    mode: 'linear' uses 'full'; 'circular' uses FFT
-    """
+
     x = np.array(x)
     y = np.array(y)
 

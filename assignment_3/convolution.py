@@ -1,7 +1,7 @@
 import numpy as np
 
 def manual_convolution(x: list[float], h: list[float]) -> list[float]:
-    """Performs manual linear convolution of two signals."""
+
     N = len(x)
     M = len(h)
     y = [0.0] * (N + M - 1)
@@ -12,5 +12,5 @@ def manual_convolution(x: list[float], h: list[float]) -> list[float]:
     return y
 
 def library_convolution(x: list[float], h: list[float]) -> list[float]:
-    """Performs convolution using numpy."""
+
     return np.convolve(x, h, mode='full').tolist()
