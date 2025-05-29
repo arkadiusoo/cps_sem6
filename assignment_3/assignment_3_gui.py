@@ -7,6 +7,7 @@ from assignment_1.plotting_utils import MatplotlibCanvas
 from assignment_3.correlation import (manual_correlation, library_correlation, correlation_via_convolution)
 from assignment_3.convolution import (manual_convolution, library_convolution)
 from assignment_3.filter_design import (design_lowpass_fir_filter, design_highpass_fir_filter, apply_filter)
+from assignment_3.radar_simulator import RadarSimulator
 
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
@@ -35,7 +36,8 @@ class Assignment3App(QWidget):
         self.combo_operation.addItems([
             "Splot – ręczny", "Splot – biblioteczny",
             "Korelacja – ręczna", "Korelacja przez splot - ręczna","Korelacja – biblioteczna",
-            "Filtracja"
+            "Filtracja",
+            "Symulacja radaru"
         ])
         controls_layout.addWidget(QLabel("Wybierz operację:"))
         controls_layout.addWidget(self.combo_operation)
@@ -73,6 +75,41 @@ class Assignment3App(QWidget):
         self.label_filter_window = QLabel("Typ okna dla filtrowania:")
         controls_layout.addWidget(self.label_filter_window)
         controls_layout.addWidget(self.combo_filter_window)
+
+        self.label_radar_distance = QLabel("Odległość obiektu [m]:")
+        self.spin_radar_distance = QSpinBox()
+        self.spin_radar_distance.setRange(1, 1000)
+        self.spin_radar_distance.setValue(15)
+        controls_layout.addWidget(self.label_radar_distance)
+        controls_layout.addWidget(self.spin_radar_distance)
+
+        self.label_radar_speed = QLabel("Prędkość sygnału [m/s]:")
+        self.spin_radar_speed = QSpinBox()
+        self.spin_radar_speed.setRange(1, 100000)
+        self.spin_radar_speed.setValue(100)
+        controls_layout.addWidget(self.label_radar_speed)
+        controls_layout.addWidget(self.spin_radar_speed)
+
+        self.label_radar_freq = QLabel("Częstotliwość próbkowania [Hz]:")
+        self.spin_radar_freq = QSpinBox()
+        self.spin_radar_freq.setRange(1, 10000)
+        self.spin_radar_freq.setValue(1000)
+        controls_layout.addWidget(self.label_radar_freq)
+        controls_layout.addWidget(self.spin_radar_freq)
+
+        self.label_radar_period = QLabel("Okres sygnału sondującego [ms]:")
+        self.spin_radar_period = QSpinBox()
+        self.spin_radar_period.setRange(1, 1000)
+        self.spin_radar_period.setValue(100)
+        controls_layout.addWidget(self.label_radar_period)
+        controls_layout.addWidget(self.spin_radar_period)
+
+        self.label_radar_buffer = QLabel("Rozmiar bufora:")
+        self.spin_radar_buffer = QSpinBox()
+        self.spin_radar_buffer.setRange(100, 10000)
+        self.spin_radar_buffer.setValue(1000)
+        controls_layout.addWidget(self.label_radar_buffer)
+        controls_layout.addWidget(self.spin_radar_buffer)
 
         self.btn_process = QPushButton("Wykonaj operację")
         self.btn_process.clicked.connect(self.perform_operation)
@@ -204,7 +241,37 @@ class Assignment3App(QWidget):
             t_result = time_values[:len(filtered_signal)]
             label = f"{label_id} Filtracja – {window_name}, {filter_type}: {short1}"
             result = filtered_signal
-            self.results.append((label, t_result, filtered_signal.tolist(), signal_values.tolist()))
+            result_as_signal = list(zip(filtered_signal.tolist(), t_result))
+            self.results.append((label, result_as_signal, filtered_signal.tolist(), signal_values.tolist()))
+            self.list_results.addItem(label)
+            self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
+            return
+
+        elif "radar" in op.lower():
+            sampling_freq = self.spin_radar_freq.value()
+            signal_speed = self.spin_radar_speed.value()
+            signal_period = self.spin_radar_period.value() / 1000.0  # convert ms to s
+            buffer_size = self.spin_radar_buffer.value()
+            real_distance = self.spin_radar_distance.value()
+            report_interval = 1.0  # unused in single-shot simulation
+
+            radar = RadarSimulator(
+                sampling_freq,
+                signal_speed,
+                signal_period,
+                buffer_size,
+                report_interval
+            )
+
+            probe = radar.generate_probe_signal()
+            echo = radar.simulate_echo(real_distance, probe)
+            estimated_distance, correlation = radar.estimate_distance(probe, echo)
+
+            label = f"[{len(self.results)+1}] Radar – rzeczywista: {real_distance}m, oszacowana: {estimated_distance:.2f}m"
+            t_corr = np.arange(len(correlation)) / sampling_freq
+            result_as_signal = list(zip(correlation.tolist(), t_corr.tolist()))
+
+            self.results.append((label, result_as_signal, correlation.tolist(), probe.tolist()))
             self.list_results.addItem(label)
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
             return
@@ -213,7 +280,8 @@ class Assignment3App(QWidget):
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
             return
 
-        self.results.append((label, t_result, result))
+        result_as_signal = list(zip(result, t_result))
+        self.results.append((label, result_as_signal, result, x))
         self.list_results.addItem(label)
         self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
 
@@ -230,7 +298,9 @@ class Assignment3App(QWidget):
         ax = canvas.ax
 
         if len(data) == 4:
-            label, t, filtered, original = data
+            label, signal_data, filtered, original = data
+            t = [pt[1] for pt in signal_data]
+            filtered = [pt[0] for pt in signal_data]
             # Make sure the arrays have the same length
             min_len = min(len(t), len(original), len(filtered))
             t = t[:min_len]
@@ -245,7 +315,9 @@ class Assignment3App(QWidget):
             ax.set_ylabel("Amplituda")
             ax.grid()
         else:
-            label, t, y = data
+            label, signal_data, y = data
+            t = [pt[1] for pt in signal_data]
+            y = [pt[0] for pt in signal_data]
             # Make sure the arrays have the same length
             min_len = min(len(t), len(y))
             t = t[:min_len]
@@ -287,3 +359,15 @@ class Assignment3App(QWidget):
         self.label_filter_length.setVisible(is_filter)
         self.spin_cutoff_freq.setVisible(is_filter)
         self.label_cutoff_freq.setVisible(is_filter)
+
+        is_radar = "radar" in op.lower()
+        self.label_radar_distance.setVisible(is_radar)
+        self.spin_radar_distance.setVisible(is_radar)
+        self.label_radar_speed.setVisible(is_radar)
+        self.spin_radar_speed.setVisible(is_radar)
+        self.label_radar_freq.setVisible(is_radar)
+        self.spin_radar_freq.setVisible(is_radar)
+        self.label_radar_period.setVisible(is_radar)
+        self.spin_radar_period.setVisible(is_radar)
+        self.label_radar_buffer.setVisible(is_radar)
+        self.spin_radar_buffer.setVisible(is_radar)
