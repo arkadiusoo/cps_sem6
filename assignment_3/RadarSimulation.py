@@ -34,3 +34,30 @@ class RadarSimulator:
         if delay_samples < self.N:
             echo[delay_samples:] = probe_signal[:self.N - delay_samples]
         return echo
+
+    def estimate_distance(self, probe_signal, echo_signal):
+        """
+        Oblicza korelację wzajemną i estymuje odległość na podstawie opóźnienia echa.
+        """
+        # Korelacja wzajemna (funkcja cross-correlation)
+        correlation = np.correlate(echo_signal, probe_signal, mode='full')
+
+        # Indeks środka (t = 0)
+        center = len(correlation) // 2
+
+        # Przeszukujemy tylko prawą połowę korelacji (dla t >= 0)
+        right_half = correlation[center:]
+
+        # Indeks maksimum korelacji w prawej połowie
+        max_index = np.argmax(right_half)
+
+        # Oblicz opóźnienie czasowe
+        delay_time = max_index * self.dt
+
+        # Oblicz odległość z S = V * t / 2
+        distance = self.V * delay_time / 2
+
+        # Zapisz do historii
+        self.distances.append(distance)
+
+        return distance, correlation
