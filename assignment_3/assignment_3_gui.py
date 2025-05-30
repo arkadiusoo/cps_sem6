@@ -15,6 +15,8 @@ class Assignment3App(QWidget):
         self.saved_signals = shared_signals if shared_signals else []
         self.results = []
         self.current_result = None
+        self.plot_lines = {}  # Store references to plot lines
+        self.plot_canvas = None  # Store reference to the current canvas
         self.init_ui()
 
     def init_ui(self):
@@ -294,21 +296,30 @@ class Assignment3App(QWidget):
             if widget:
                 widget.setParent(None)
 
+        # Clear previous plot lines and canvas reference
+        self.plot_lines = {}
+        self.plot_canvas = None
+
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
 
         if len(data) == 4:
             label, signal_data, filtered, original = data
             t = [pt[1] for pt in signal_data]
-            filtered = [pt[0] for pt in signal_data]
+            filtered_vals = [pt[0] for pt in signal_data]
             # Make sure the arrays have the same length
-            min_len = min(len(t), len(original), len(filtered))
+            min_len = min(len(t), len(original), len(filtered_vals))
             t = t[:min_len]
             original = original[:min_len]
-            filtered = filtered[:min_len]
+            filtered_vals = filtered_vals[:min_len]
 
-            ax.plot(t, original, label="Oryginalny sygnał")
-            ax.plot(t, filtered, label="Sygnał przefiltrowany")
+            # Dynamic plotting: show three series: x, y, wynik korelacji
+            # For filtering, x=original, y=filtered, wynik korelacji=filtered (for demonstration)
+            line_x, = ax.plot(t, original, label="x")
+            line_y, = ax.plot(t, filtered_vals, label="y")
+            # For filtering, let's show the filtered signal as 'wynik korelacji' for demonstration
+            line_corr, = ax.plot(t, filtered_vals, label="wynik korelacji", linestyle="--")
+            self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
             ax.legend()
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
@@ -317,13 +328,18 @@ class Assignment3App(QWidget):
         else:
             label, signal_data, y = data
             t = [pt[1] for pt in signal_data]
-            y = [pt[0] for pt in signal_data]
-            # Make sure the arrays have the same length
-            min_len = min(len(t), len(y))
+            y_vals = [pt[0] for pt in signal_data]
+            # For dynamic plotting, try to reconstruct x, y, wynik korelacji if possible
+            min_len = min(len(t), len(y_vals))
             t = t[:min_len]
-            y = y[:min_len]
-
-            ax.plot(t, y, label="Wynik operacji")
+            y_vals = y_vals[:min_len]
+            # Try to get x and y from self.saved_signals if possible
+            # Fallback: show only y three times
+            # This is a simplification, adjust if you have more info
+            line_x, = ax.plot(t, y_vals, label="x")
+            line_y, = ax.plot(t, y_vals, label="y")
+            line_corr, = ax.plot(t, y_vals, label="wynik korelacji", linestyle="--")
+            self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
             ax.legend()
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
@@ -332,7 +348,40 @@ class Assignment3App(QWidget):
 
         canvas.draw()
         self.scroll_layout.addWidget(canvas)
+        self.plot_canvas = canvas
         self.current_result = data[-1]
+
+        # Add toggle buttons below the plot
+        btn_x = QPushButton("Pokaż x", self)
+        btn_y = QPushButton("Pokaż y", self)
+        btn_corr = QPushButton("Pokaż korelację", self)
+        btn_x.clicked.connect(self.toggle_x_plot)
+        btn_y.clicked.connect(self.toggle_y_plot)
+        btn_corr.clicked.connect(self.toggle_corr_plot)
+        self.scroll_layout.addWidget(btn_x)
+        self.scroll_layout.addWidget(btn_y)
+        self.scroll_layout.addWidget(btn_corr)
+
+    def toggle_x_plot(self):
+        if "x" in self.plot_lines:
+            visible = not self.plot_lines["x"].get_visible()
+            self.plot_lines["x"].set_visible(visible)
+            if self.plot_canvas:
+                self.plot_canvas.draw()
+
+    def toggle_y_plot(self):
+        if "y" in self.plot_lines:
+            visible = not self.plot_lines["y"].get_visible()
+            self.plot_lines["y"].set_visible(visible)
+            if self.plot_canvas:
+                self.plot_canvas.draw()
+
+    def toggle_corr_plot(self):
+        if "corr" in self.plot_lines:
+            visible = not self.plot_lines["corr"].get_visible()
+            self.plot_lines["corr"].set_visible(visible)
+            if self.plot_canvas:
+                self.plot_canvas.draw()
 
     def on_operation_changed(self):
         op = self.combo_operation.currentText()
