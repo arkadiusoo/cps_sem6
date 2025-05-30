@@ -293,7 +293,7 @@ class Assignment3App(QWidget):
             return
 
         result_as_signal = list(zip(result, t_result))
-        self.results.append((label, result_as_signal, result, x))
+        self.results.append((label, result_as_signal, result, x, y))
         self.list_results.addItem(label)
         self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
 
@@ -313,7 +313,25 @@ class Assignment3App(QWidget):
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
 
-        if len(data) == 4:
+        if len(data) == 5:
+            label, signal_data, correlation_vals, x_vals, y_vals = data
+            t = [pt[1] for pt in signal_data]
+            corr = [pt[0] for pt in signal_data]
+            min_len = min(len(t), len(x_vals), len(y_vals), len(corr))
+            t = t[:min_len]
+            x_vals = x_vals[:min_len]
+            y_vals = y_vals[:min_len]
+            corr = corr[:min_len]
+            line_x, = ax.plot(t, x_vals, label="x")
+            line_y, = ax.plot(t, y_vals, label="y")
+            line_corr, = ax.plot(t, corr, label="korelacja", linestyle="--")
+            self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
+            ax.legend()
+            ax.set_title(label)
+            ax.set_xlabel("Czas [s]")
+            ax.set_ylabel("Amplituda")
+            ax.grid()
+        elif len(data) == 4:
             label, signal_data, filtered, original = data
             t = [pt[1] for pt in signal_data]
             filtered_vals = [pt[0] for pt in signal_data]
