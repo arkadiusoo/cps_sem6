@@ -281,9 +281,9 @@ class Assignment3App(QWidget):
 
             label = f"[{len(self.results)+1}] Radar – rzeczywista: {real_distance}m, oszacowana: {estimated_distance:.2f}m"
             t_corr = np.arange(len(correlation)) / sampling_freq
-            result_as_signal = list(zip(correlation.tolist(), t_corr.tolist()))
+            result_as_signal = list(zip(correlation, t_corr))
 
-            self.results.append((label, result_as_signal, correlation.tolist(), probe.tolist()))
+            self.results.append((label, result_as_signal, correlation, probe))
             self.list_results.addItem(label)
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
             return

@@ -1,5 +1,5 @@
 import numpy as np
-
+from assignment_3.correlation import (manual_correlation)
 class RadarSimulator:
     def __init__(self, sampling_freq, signal_speed, signal_period, buffer_size, report_interval):
         """
@@ -40,7 +40,7 @@ class RadarSimulator:
         Oblicza korelację wzajemną i estymuje odległość na podstawie opóźnienia echa.
         """
         # Korelacja wzajemna (funkcja cross-correlation)
-        correlation = np.correlate(echo_signal, probe_signal, mode='full')
+        correlation = manual_correlation(echo_signal, probe_signal, mode='linear')
 
         # Indeks środka (t = 0)
         center = len(correlation) // 2
