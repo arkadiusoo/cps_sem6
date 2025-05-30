@@ -331,7 +331,7 @@ class Assignment3App(QWidget):
             lines, labels = ax.get_legend_handles_labels()
             lines2, labels2 = ax2.get_legend_handles_labels()
             ax2.legend(lines + lines2, labels + labels2, loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
-            ax2.set_ylabel("Korelacja")
+            ax2.set_ylabel(f"{label.split()[1]}")
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
