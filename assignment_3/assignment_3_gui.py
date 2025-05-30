@@ -179,7 +179,12 @@ class Assignment3App(QWidget):
             else:
                 result = library_convolution(x, y)
                 label = f"{label_id} Splot biblioteczny: {short1} * {short2}"
-            t_result = np.linspace(t_x[0], t_x[0] + len(result) / 1000, len(result))
+            # Ustal oś czasu dla wyniku splotu na podstawie t_x
+            if len(t_x) >= 2:
+                dt = t_x[1] - t_x[0]
+                t_result = np.arange(len(result)) * dt
+            else:
+                t_result = np.linspace(0, 1, len(result))
 
         elif "Korelacja" in op:
             mode = self.combo_correlation_method.currentText().lower()  # 'liniowa' or 'cyrkularna'
@@ -196,7 +201,12 @@ class Assignment3App(QWidget):
                 result = library_correlation(x, y, mode=mode_eng)
                 label = f"{label_id} Korelacja {mode} biblioteczna: {short1} ⊛ {short2}"
 
-            t_result = np.linspace(0, len(result) / 1000, len(result))
+            # Ustal oś czasu dla korelacji na podstawie t_x
+            if len(t_x) >= 2:
+                dt = t_x[1] - t_x[0]
+                t_result = np.arange(len(result)) * dt
+            else:
+                t_result = np.linspace(0, 1, len(result))
 
 
         elif "Filtracja" in op:
