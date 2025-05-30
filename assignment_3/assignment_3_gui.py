@@ -322,11 +322,16 @@ class Assignment3App(QWidget):
             x_vals = x_vals[:min_len]
             y_vals = y_vals[:min_len]
             corr = corr[:min_len]
+            ax2 = ax.twinx()
             line_x, = ax.plot(t, x_vals, label="x")
             line_y, = ax.plot(t, y_vals, label="y")
-            line_corr, = ax.plot(t, corr, label="korelacja", linestyle="--")
+            line_corr, = ax2.plot(t, corr, label="korelacja", linestyle="--", color="tab:red")
             self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
-            ax.legend()
+
+            lines, labels = ax.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            ax2.legend(lines + lines2, labels + labels2, loc="upper right")
+            ax2.set_ylabel("Korelacja")
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
