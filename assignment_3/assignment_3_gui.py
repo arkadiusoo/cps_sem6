@@ -330,7 +330,7 @@ class Assignment3App(QWidget):
 
             lines, labels = ax.get_legend_handles_labels()
             lines2, labels2 = ax2.get_legend_handles_labels()
-            ax2.legend(lines + lines2, labels + labels2, loc="upper right")
+            ax2.legend(lines + lines2, labels + labels2, loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
             ax2.set_ylabel("Korelacja")
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
@@ -353,7 +353,7 @@ class Assignment3App(QWidget):
             # For filtering, let's show the filtered signal as 'wynik korelacji' for demonstration
             line_corr, = ax.plot(t, filtered_vals, label="wynik korelacji", linestyle="--")
             self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
-            ax.legend()
+            ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
@@ -373,7 +373,7 @@ class Assignment3App(QWidget):
             line_y, = ax.plot(t, y_vals, label="y")
             line_corr, = ax.plot(t, y_vals, label="wynik korelacji", linestyle="--")
             self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
-            ax.legend()
+            ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
@@ -385,8 +385,8 @@ class Assignment3App(QWidget):
         self.current_result = data[-1]
 
         # Add toggle buttons below the plot
-        btn_x = QPushButton("Pokaż x", self)
-        btn_y = QPushButton("Pokaż y", self)
+        btn_x = QPushButton("Pokaż sygnał 1", self)
+        btn_y = QPushButton("Pokaż sygnał 2", self)
         btn_corr = QPushButton("Pokaż korelację", self)
         btn_x.clicked.connect(self.toggle_x_plot)
         btn_y.clicked.connect(self.toggle_y_plot)
