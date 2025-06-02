@@ -395,8 +395,8 @@ class Assignment3App(QWidget):
         self.current_result = data[-1]
 
         # Add toggle buttons below the plot
-        btn_x = QPushButton("Pokaż sygnał 1", self)
-        btn_y = QPushButton("Pokaż sygnał 2", self)
+        btn_x = QPushButton("Pokaż sygnał nadawczy", self)
+        btn_y = QPushButton("Pokaż sygnał odbiorczy", self)
         btn_corr = QPushButton("Pokaż korelację", self)
         btn_x.clicked.connect(self.toggle_x_plot)
         btn_y.clicked.connect(self.toggle_y_plot)
