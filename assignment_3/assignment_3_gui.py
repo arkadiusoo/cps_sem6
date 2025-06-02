@@ -277,13 +277,13 @@ class Assignment3App(QWidget):
                 sig1
             )
 
-            # probe = radar.generate_probe_signal()
             echo = radar.simulate_echo(real_distance)
             estimated_distance, correlation = radar.estimate_distance(echo)
 
             label = f"[{len(self.results)+1}] Radar – rzeczywista: {real_distance}m, oszacowana: {estimated_distance:.2f}m"
             t_corr = np.arange(len(correlation)) / sampling_freq
-            result_as_signal = list(zip(correlation, t_corr))
+            correlation = [cor[0] for cor in correlation]
+            result_as_signal = [correlation,t_corr]
 
             self.results.append((label, result_as_signal, echo, sig1))
             self.list_results.addItem(label)
@@ -341,8 +341,8 @@ class Assignment3App(QWidget):
         elif len(data) == 4:
 
             label, signal_data, echo, sig1 = data
-            t = [pt[1] for pt in signal_data]
-            correlation = [pt[0] for pt in signal_data]
+            t = signal_data[1]
+            correlation = signal_data[0]
 
             # Assume probe and echo share the same sampling interval as correlation
             min_len = min(len(t), len(sig1), len(echo), len(correlation))
