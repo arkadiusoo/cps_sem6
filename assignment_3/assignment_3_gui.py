@@ -285,7 +285,7 @@ class Assignment3App(QWidget):
             t_corr = np.arange(len(correlation)) / sampling_freq
             result_as_signal = list(zip(correlation, t_corr))
 
-            self.results.append((label, result_as_signal, correlation, sig1))
+            self.results.append((label, result_as_signal, echo, sig1))
             self.list_results.addItem(label)
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
             return
@@ -339,26 +339,32 @@ class Assignment3App(QWidget):
             ax.set_ylabel("Amplituda")
             ax.grid()
         elif len(data) == 4:
-            label, signal_data, filtered, original = data
+            label, signal_data, echo, sig1 = data
             t = [pt[1] for pt in signal_data]
-            filtered_vals = [pt[0] for pt in signal_data]
-            # Make sure the arrays have the same length
-            min_len = min(len(t), len(original), len(filtered_vals))
-            t = t[:min_len]
-            original = original[:min_len]
-            filtered_vals = filtered_vals[:min_len]
+            correlation = [pt[0] for pt in signal_data]
 
-            # Dynamic plotting: show three series: x, y, wynik korelacji
-            # For filtering, x=original, y=filtered, wynik korelacji=filtered (for demonstration)
-            line_x, = ax.plot(t, original, label="x")
-            line_y, = ax.plot(t, filtered_vals, label="y")
-            # For filtering, let's show the filtered signal as 'wynik korelacji' for demonstration
-            line_corr, = ax.plot(t, filtered_vals, label="wynik korelacji", linestyle="--")
-            self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
-            ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
+            # Assume probe and echo share the same sampling interval as correlation
+            min_len = min(len(t), len(sig1), len(echo), len(correlation))
+            t = t[:min_len]
+            sig1 = sig1[:min_len]
+            echo = echo[:min_len]
+            correlation = correlation[:min_len]
+
+            ax2 = ax.twinx()
+            line_probe = ax.plot(t, sig1, label="sygnał wzorcowy")[0]
+            line_echo = ax.plot(t, echo, label="echo")[0]
+            line_corr = ax2.plot(t, correlation, label="korelacja", linestyle="--", color="tab:red")[0]
+
+            self.plot_lines = {"x": line_probe, "y": line_echo, "corr": line_corr}
+
+            lines, labels = ax.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            ax2.legend(lines + lines2, labels + labels2, loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
+
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
-            ax.set_ylabel("Amplituda")
+            ax.set_ylabel("Amplituda sygnałów")
+            ax2.set_ylabel("Wartość korelacji")
             ax.grid()
         else:
             label, signal_data, y = data
