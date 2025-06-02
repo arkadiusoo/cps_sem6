@@ -9,14 +9,14 @@ class RadarSimulator:
         :param buffer_size: liczba próbek buforowanych
         :param report_interval: jak często wykonywać korelację [s]
         """
-        self.Fs = sampling_freq
-        self.dt = 1.0 / sampling_freq
-        self.V = signal_speed
-        self.T = signal_period
-        self.N = buffer_size
+        self.Fs = sampling_freq         # częstotliwość próbkowania
+        self.dt = 1.0 / sampling_freq   # odstęp czasowy między próbkami
+        self.V = signal_speed           # prędkość propagacji sygnału (np. dźwięku lub światła)
+        self.T = signal_period          # okres fali sondującej
+        self.N = buffer_size            # długość bufora (ilość próbek sygnału)
         self.report_interval = report_interval
 
-        self.time = np.linspace(0, self.N * self.dt, self.N, endpoint=False)
+        self.time = np.linspace(0, self.N * self.dt, self.N, endpoint=False) # nowa siatka czasowa
 
         # miejsce na wyniki
         self.distances = []
