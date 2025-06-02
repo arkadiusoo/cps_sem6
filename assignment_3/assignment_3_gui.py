@@ -43,6 +43,7 @@ class Assignment3App(QWidget):
         ])
         controls_layout.addWidget(QLabel("Wybierz operację:"))
         controls_layout.addWidget(self.combo_operation)
+        self.combo_operation.setCurrentIndex(6)
 
         self.combo_correlation_method = QComboBox()
         self.combo_correlation_method.addItems(["Liniowa", "Cyrkularna"])
@@ -272,18 +273,19 @@ class Assignment3App(QWidget):
                 signal_speed,
                 signal_period,
                 buffer_size,
-                report_interval
+                report_interval,
+                sig1
             )
 
-            probe = radar.generate_probe_signal()
-            echo = radar.simulate_echo(real_distance, probe)
-            estimated_distance, correlation = radar.estimate_distance(probe, echo)
+            # probe = radar.generate_probe_signal()
+            echo = radar.simulate_echo(real_distance)
+            estimated_distance, correlation = radar.estimate_distance(echo)
 
             label = f"[{len(self.results)+1}] Radar – rzeczywista: {real_distance}m, oszacowana: {estimated_distance:.2f}m"
             t_corr = np.arange(len(correlation)) / sampling_freq
             result_as_signal = list(zip(correlation, t_corr))
 
-            self.results.append((label, result_as_signal, correlation, probe))
+            self.results.append((label, result_as_signal, correlation, sig1))
             self.list_results.addItem(label)
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
             return
@@ -312,7 +314,7 @@ class Assignment3App(QWidget):
 
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
-
+        print(len(data))
         if len(data) == 5:
             label, signal_data, correlation_vals, x_vals, y_vals = data
             t = [pt[1] for pt in signal_data]
