@@ -29,7 +29,7 @@ class RadarSimulator:
 
         # Korelacja wzajemna (funkcja cross-correlation)
         correlation = manual_correlation(echo_signal, self.probe_signal, mode='linear')
-
+        print("korelcja:", correlation)
         # Indeks środka (t = 0)
         center = len(correlation) // 2
 
@@ -38,6 +38,7 @@ class RadarSimulator:
 
         # Indeks maksimum korelacji w prawej połowie
         max_index = np.argmax(right_half)
+        print(right_half)
 
         # Oblicz opóźnienie czasowe
         delay_time = max_index * self.dt
@@ -51,4 +52,5 @@ class RadarSimulator:
         # Zapisz do historii
         self.distances.append(distance)
 
+        # return distance, correlation[center:]
         return distance, correlation

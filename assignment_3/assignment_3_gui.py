@@ -81,7 +81,7 @@ class Assignment3App(QWidget):
 
         self.label_radar_distance = QLabel("Odległość obiektu [m]:")
         self.spin_radar_distance = QSpinBox()
-        self.spin_radar_distance.setRange(1, 1000)
+        self.spin_radar_distance.setRange(0, 1000)
         self.spin_radar_distance.setValue(15)
         controls_layout.addWidget(self.label_radar_distance)
         controls_layout.addWidget(self.spin_radar_distance)
@@ -286,6 +286,7 @@ class Assignment3App(QWidget):
             label = f"[{len(self.results)+1}] Radar – rzeczywista: {real_distance}m, oszacowana: {estimated_distance:.2f}m"
             t_corr = np.arange(len(correlation)) / sampling_freq
             correlation = [cor[0] for cor in correlation]
+            result_as_signal = [correlation,t_x]
             result_as_signal = [correlation,t_corr]
 
             self.results.append((label, result_as_signal, echo, sig1))
