@@ -7,6 +7,7 @@ from assignment_1.plotting_utils import MatplotlibCanvas
 from assignment_3.correlation import (manual_correlation, library_correlation, correlation_via_convolution)
 from assignment_3.convolution import (manual_convolution, library_convolution)
 from assignment_3.filter_design import (design_lowpass_fir_filter, design_highpass_fir_filter, apply_filter)
+from assignment_3.radar_simulator import RadarSimulator
 
 class Assignment3App(QWidget):
     def __init__(self, shared_signals=None):
@@ -14,6 +15,8 @@ class Assignment3App(QWidget):
         self.saved_signals = shared_signals if shared_signals else []
         self.results = []
         self.current_result = None
+        self.plot_lines = {}  # Store references to plot lines
+        self.plot_canvas = None  # Store reference to the current canvas
         self.init_ui()
 
     def init_ui(self):
@@ -35,10 +38,12 @@ class Assignment3App(QWidget):
         self.combo_operation.addItems([
             "Splot – ręczny", "Splot – biblioteczny",
             "Korelacja – ręczna", "Korelacja przez splot - ręczna","Korelacja – biblioteczna",
-            "Filtracja"
+            "Filtracja",
+            "Symulacja radaru"
         ])
         controls_layout.addWidget(QLabel("Wybierz operację:"))
         controls_layout.addWidget(self.combo_operation)
+        self.combo_operation.setCurrentIndex(6)
 
         self.combo_correlation_method = QComboBox()
         self.combo_correlation_method.addItems(["Liniowa", "Cyrkularna"])
@@ -73,6 +78,44 @@ class Assignment3App(QWidget):
         self.label_filter_window = QLabel("Typ okna dla filtrowania:")
         controls_layout.addWidget(self.label_filter_window)
         controls_layout.addWidget(self.combo_filter_window)
+
+        self.label_radar_distance = QLabel("Odległość obiektu [m]:")
+        self.spin_radar_distance = QSpinBox()
+        self.spin_radar_distance.setRange(0, 1000)
+        self.spin_radar_distance.setValue(15)
+        controls_layout.addWidget(self.label_radar_distance)
+        controls_layout.addWidget(self.spin_radar_distance)
+
+        self.label_radar_speed = QLabel("Prędkość sygnału [m/s]:")
+        self.spin_radar_speed = QSpinBox()
+        self.spin_radar_speed.setRange(1, 100000)
+        self.spin_radar_speed.setValue(100)
+        controls_layout.addWidget(self.label_radar_speed)
+        controls_layout.addWidget(self.spin_radar_speed)
+
+        self.label_radar_freq = QLabel("Częstotliwość próbkowania [Hz]:")
+        self.spin_radar_freq = QSpinBox()
+        self.spin_radar_freq.setRange(1, 10000)
+        self.spin_radar_freq.setValue(1000)
+        controls_layout.addWidget(self.label_radar_freq)
+        controls_layout.addWidget(self.spin_radar_freq)
+
+        self.label_radar_period = QLabel("Okres sygnału sondującego [ms]:")
+        self.spin_radar_period = QSpinBox()
+        self.spin_radar_period.setRange(1, 1000)
+        self.spin_radar_period.setValue(100)
+        self.label_radar_period.setVisible(False)
+        self.spin_radar_period.setVisible(False)
+        controls_layout.addWidget(self.label_radar_period)
+        controls_layout.addWidget(self.spin_radar_period)
+
+
+        self.label_radar_buffer = QLabel("Rozmiar bufora:")
+        self.spin_radar_buffer = QSpinBox()
+        self.spin_radar_buffer.setRange(100, 10000)
+        self.spin_radar_buffer.setValue(1000)
+        controls_layout.addWidget(self.label_radar_buffer)
+        controls_layout.addWidget(self.spin_radar_buffer)
 
         self.btn_process = QPushButton("Wykonaj operację")
         self.btn_process.clicked.connect(self.perform_operation)
@@ -140,7 +183,12 @@ class Assignment3App(QWidget):
             else:
                 result = library_convolution(x, y)
                 label = f"{label_id} Splot biblioteczny: {short1} * {short2}"
-            t_result = np.linspace(t_x[0], t_x[0] + len(result) / 1000, len(result))
+            # Ustal oś czasu dla wyniku splotu na podstawie t_x
+            if len(t_x) >= 2:
+                dt = t_x[1] - t_x[0]
+                t_result = np.arange(len(result)) * dt
+            else:
+                t_result = np.linspace(0, 1, len(result))
 
         elif "Korelacja" in op:
             mode = self.combo_correlation_method.currentText().lower()  # 'liniowa' or 'cyrkularna'
@@ -157,7 +205,12 @@ class Assignment3App(QWidget):
                 result = library_correlation(x, y, mode=mode_eng)
                 label = f"{label_id} Korelacja {mode} biblioteczna: {short1} ⊛ {short2}"
 
-            t_result = np.linspace(0, len(result) / 1000, len(result))
+            # Ustal oś czasu dla korelacji na podstawie t_x
+            if len(t_x) >= 2:
+                dt = t_x[1] - t_x[0]
+                t_result = np.arange(len(result)) * dt
+            else:
+                t_result = np.linspace(0, 1, len(result))
 
 
         elif "Filtracja" in op:
@@ -204,7 +257,39 @@ class Assignment3App(QWidget):
             t_result = time_values[:len(filtered_signal)]
             label = f"{label_id} Filtracja – {window_name}, {filter_type}: {short1}"
             result = filtered_signal
-            self.results.append((label, t_result, filtered_signal.tolist(), signal_values.tolist()))
+            result_as_signal = list(zip(filtered_signal.tolist(), t_result))
+            self.results.append((label, result_as_signal, filtered_signal.tolist(), signal_values.tolist()))
+            self.list_results.addItem(label)
+            self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
+            return
+
+        elif "radar" in op.lower():
+            sampling_freq = self.spin_radar_freq.value()
+            signal_speed = self.spin_radar_speed.value()
+            signal_period = self.spin_radar_period.value() / 1000.0  # convert ms to s
+            buffer_size = self.spin_radar_buffer.value()
+            real_distance = self.spin_radar_distance.value()
+            report_interval = 1.0  # unused in single-shot simulation
+
+            radar = RadarSimulator(
+                sampling_freq,
+                signal_speed,
+                signal_period,
+                buffer_size,
+                report_interval,
+                sig1
+            )
+
+            echo = radar.simulate_echo(real_distance)
+            estimated_distance, correlation = radar.estimate_distance(echo)
+
+            label = f"[{len(self.results)+1}] Radar – rzeczywista: {real_distance}m, oszacowana: {estimated_distance:.2f}m"
+            t_corr = np.arange(len(correlation)) / sampling_freq
+            correlation = [cor[0] for cor in correlation]
+            result_as_signal = [correlation,t_x]
+            result_as_signal = [correlation,t_corr]
+
+            self.results.append((label, result_as_signal, echo, sig1))
             self.list_results.addItem(label)
             self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
             return
@@ -213,7 +298,8 @@ class Assignment3App(QWidget):
             QMessageBox.information(self, "Info", "Wybrana operacja nie została jeszcze zaimplementowana.")
             return
 
-        self.results.append((label, t_result, result))
+        result_as_signal = list(zip(result, t_result))
+        self.results.append((label, result_as_signal, result, x, y))
         self.list_results.addItem(label)
         self.display_selected_result(self.list_results.item(self.list_results.count() - 1))
 
@@ -226,33 +312,82 @@ class Assignment3App(QWidget):
             if widget:
                 widget.setParent(None)
 
+        # Clear previous plot lines and canvas reference
+        self.plot_lines = {}
+        self.plot_canvas = None
+
         canvas = MatplotlibCanvas(self)
         ax = canvas.ax
-
-        if len(data) == 4:
-            label, t, filtered, original = data
-            # Make sure the arrays have the same length
-            min_len = min(len(t), len(original), len(filtered))
+        print(len(data))
+        if len(data) == 5:
+            label, signal_data, correlation_vals, x_vals, y_vals = data
+            t = [pt[1] for pt in signal_data]
+            corr = [pt[0] for pt in signal_data]
+            min_len = min(len(t), len(x_vals), len(y_vals), len(corr))
             t = t[:min_len]
-            original = original[:min_len]
-            filtered = filtered[:min_len]
+            x_vals = x_vals[:min_len]
+            y_vals = y_vals[:min_len]
+            corr = corr[:min_len]
+            ax2 = ax.twinx()
+            line_x, = ax.plot(t, x_vals, label="x")
+            line_y, = ax.plot(t, y_vals, label="y")
+            line_corr, = ax2.plot(t, corr, label="korelacja", linestyle="--", color="tab:red")
+            self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
 
-            ax.plot(t, original, label="Oryginalny sygnał")
-            ax.plot(t, filtered, label="Sygnał przefiltrowany")
-            ax.legend()
+            lines, labels = ax.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            ax2.legend(lines + lines2, labels + labels2, loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
+            ax2.set_ylabel(f"{label.split()[1]}")
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
             ax.grid()
-        else:
-            label, t, y = data
-            # Make sure the arrays have the same length
-            min_len = min(len(t), len(y))
-            t = t[:min_len]
-            y = y[:min_len]
+        elif len(data) == 4:
 
-            ax.plot(t, y, label="Wynik operacji")
-            ax.legend()
+            label, signal_data, echo, sig1 = data
+            t = signal_data[1]
+            correlation = signal_data[0]
+
+            # Assume probe and echo share the same sampling interval as correlation
+            min_len = min(len(t), len(sig1), len(echo), len(correlation))
+            t = t[:min_len]
+            # Extract only amplitude values for plotting
+            sig1_vals = [pt[0] for pt in sig1[:min_len]]
+            echo_vals = [pt[0] for pt in echo[:min_len]]
+            correlation = correlation[:min_len]
+
+            ax2 = ax.twinx()
+            line_probe = ax.plot(t, sig1_vals, label="sygnał wzorcowy")[0]
+            line_echo = ax.plot(t, echo_vals, label="echo")[0]
+            line_corr = ax2.plot(t, correlation, label="korelacja", linestyle="--", color="tab:red")[0]
+
+            self.plot_lines = {"x": line_probe, "y": line_echo, "corr": line_corr}
+
+            lines, labels = ax.get_legend_handles_labels()
+            lines2, labels2 = ax2.get_legend_handles_labels()
+            # ax2.legend(lines + lines2, labels + labels2, loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
+
+            ax.set_title(label)
+            ax.set_xlabel("Czas [s]")
+            ax.set_ylabel("Amplituda sygnałów")
+            ax2.set_ylabel("Wartość korelacji")
+            ax.grid()
+        elif len(data) == 3:
+            label, signal_data, y = data
+            t = [pt[1] for pt in signal_data]
+            y_vals = [pt[0] for pt in signal_data]
+            # For dynamic plotting, try to reconstruct x, y, wynik korelacji if possible
+            min_len = min(len(t), len(y_vals))
+            t = t[:min_len]
+            y_vals = y_vals[:min_len]
+            # Try to get x and y from self.saved_signals if possible
+            # Fallback: show only y three times
+            # This is a simplification, adjust if you have more info
+            line_x, = ax.plot(t, y_vals, label="x")
+            line_y, = ax.plot(t, y_vals, label="y")
+            line_corr, = ax.plot(t, y_vals, label="wynik korelacji", linestyle="--")
+            self.plot_lines = {"x": line_x, "y": line_y, "corr": line_corr}
+            ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.3), ncol=3)
             ax.set_title(label)
             ax.set_xlabel("Czas [s]")
             ax.set_ylabel("Amplituda")
@@ -260,7 +395,40 @@ class Assignment3App(QWidget):
 
         canvas.draw()
         self.scroll_layout.addWidget(canvas)
+        self.plot_canvas = canvas
         self.current_result = data[-1]
+
+        # Add toggle buttons below the plot
+        btn_x = QPushButton("Pokaż sygnał nadawczy", self)
+        btn_y = QPushButton("Pokaż sygnał odbiorczy", self)
+        btn_corr = QPushButton("Pokaż korelację", self)
+        btn_x.clicked.connect(self.toggle_x_plot)
+        btn_y.clicked.connect(self.toggle_y_plot)
+        btn_corr.clicked.connect(self.toggle_corr_plot)
+        self.scroll_layout.addWidget(btn_x)
+        self.scroll_layout.addWidget(btn_y)
+        self.scroll_layout.addWidget(btn_corr)
+
+    def toggle_x_plot(self):
+        if "x" in self.plot_lines:
+            visible = not self.plot_lines["x"].get_visible()
+            self.plot_lines["x"].set_visible(visible)
+            if self.plot_canvas:
+                self.plot_canvas.draw()
+
+    def toggle_y_plot(self):
+        if "y" in self.plot_lines:
+            visible = not self.plot_lines["y"].get_visible()
+            self.plot_lines["y"].set_visible(visible)
+            if self.plot_canvas:
+                self.plot_canvas.draw()
+
+    def toggle_corr_plot(self):
+        if "corr" in self.plot_lines:
+            visible = not self.plot_lines["corr"].get_visible()
+            self.plot_lines["corr"].set_visible(visible)
+            if self.plot_canvas:
+                self.plot_canvas.draw()
 
     def on_operation_changed(self):
         op = self.combo_operation.currentText()
@@ -287,3 +455,17 @@ class Assignment3App(QWidget):
         self.label_filter_length.setVisible(is_filter)
         self.spin_cutoff_freq.setVisible(is_filter)
         self.label_cutoff_freq.setVisible(is_filter)
+
+        is_radar = "radar" in op.lower()
+        self.label_radar_distance.setVisible(is_radar)
+        self.spin_radar_distance.setVisible(is_radar)
+        self.label_radar_speed.setVisible(is_radar)
+        self.spin_radar_speed.setVisible(is_radar)
+        self.label_radar_freq.setVisible(is_radar)
+        self.spin_radar_freq.setVisible(is_radar)
+        self.label_radar_period.setVisible(is_radar)
+        self.spin_radar_period.setVisible(is_radar)
+        self.label_radar_buffer.setVisible(is_radar)
+        self.spin_radar_buffer.setVisible(is_radar)
+        self.label_radar_period.setVisible(False)
+        self.spin_radar_period.setVisible(False)

@@ -18,8 +18,11 @@ def manual_correlation(x, y, mode="linear"):
             acc = 0.0
             for k in range(M):
                 if 0 <= n - k < N:
-                    acc += y[k] * x[n - k]
+                    acc += y[k] * x[k-n]
+                    print("y(k) = {} /t")
             result.append(acc)
+        print(len(result))
+        print("koreclacja w manual correlation:", result)
         return result
 
     elif mode == "circular":
@@ -33,6 +36,7 @@ def manual_correlation(x, y, mode="linear"):
             for k in range(L):
                 acc += y_padded[k] * x_padded[(n - k) % L]
             result.append(acc)
+
         return result
 
     else:

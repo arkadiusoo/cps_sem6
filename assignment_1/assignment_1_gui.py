@@ -50,7 +50,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_duration.setRange(0.000, 1000.0)
         self.spin_duration.setSingleStep(1)
         self.spin_duration.setDecimals(2)
-        self.spin_duration.setValue(0.01)
+        self.spin_duration.setValue(4)
 
         # t1
         self.label_start_time = QLabel("Czas początkowy (t1):")
@@ -70,7 +70,7 @@ class SignalGeneratorApp(QWidget):
         self.spin_period.setRange(0.00001, 1000.0)
         self.spin_period.setSingleStep(0.1)
         self.spin_period.setDecimals(5)
-        self.spin_period.setValue(0.01)
+        self.spin_period.setValue(1)
 
         # kw
         self.label_duty = QLabel("Współ. wypełnienia (k_w):")
