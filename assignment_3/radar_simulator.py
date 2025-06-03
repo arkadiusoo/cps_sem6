@@ -2,18 +2,11 @@ import numpy as np
 from assignment_3.correlation import (manual_correlation)
 class RadarSimulator:
     def __init__(self, sampling_freq, signal_speed, signal_period, buffer_size, report_interval, probe_signal):
-        """
-        :param sampling_freq: częstotliwość próbkowania [Hz]
-        :param signal_speed: prędkość propagacji sygnału [jedn. odległości / s]
-        :param signal_period: okres sygnału sondującego [s]
-        :param buffer_size: liczba próbek buforowanych
-        :param report_interval: jak często wykonywać korelację [s]
-        :param probe_signal: zewnętrznie dostarczony sygnał sondujący
-        """
+
         self.Fs = sampling_freq         # częstotliwość próbkowania
         self.dt = 1.0 / sampling_freq   # odstęp czasowy między próbkami
         self.V = signal_speed           # prędkość propagacji sygnału (np. dźwięku lub światła)
-        self.T = signal_period          # okres fali sondującej
+        self.T = signal_period          # okres fali sondującej - nieuzywane
         self.N = buffer_size            # długość bufora (ilość próbek sygnału)
         self.report_interval = report_interval
         self.probe_signal = probe_signal
@@ -30,9 +23,9 @@ class RadarSimulator:
         return echo
 
     def estimate_distance(self, echo_signal):
-        """
-        Oblicza korelację wzajemną i estymuje odległość na podstawie opóźnienia echa.
-        """
+
+        # Oblicza korelację wzajemną i estymuje odległość na podstawie opóźnienia echa.
+
         # Korelacja wzajemna (funkcja cross-correlation)
         correlation = manual_correlation(echo_signal, self.probe_signal, mode='linear')
 

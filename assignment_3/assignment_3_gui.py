@@ -104,8 +104,8 @@ class Assignment3App(QWidget):
         self.spin_radar_period = QSpinBox()
         self.spin_radar_period.setRange(1, 1000)
         self.spin_radar_period.setValue(100)
-        controls_layout.addWidget(self.label_radar_period)
-        controls_layout.addWidget(self.spin_radar_period)
+        # controls_layout.addWidget(self.label_radar_period)
+        # controls_layout.addWidget(self.spin_radar_period)
 
         self.label_radar_buffer = QLabel("Rozmiar bufora:")
         self.spin_radar_buffer = QSpinBox()
