@@ -16,6 +16,7 @@ class RadarSimulator:
     def simulate_echo(self, distance):
         # Oblicz opóźnienie czasowe
         delay_time = 2 * distance / self.V
+        print("delay time w echo: {}".format(delay_time))
         delay_samples = int(delay_time * self.Fs)
         echo = np.zeros_like(self.probe_signal)
         if delay_samples < self.N:
@@ -40,9 +41,12 @@ class RadarSimulator:
 
         # Oblicz opóźnienie czasowe
         delay_time = max_index * self.dt
+        print("maks index: {}\nself.dt: {}".format(max_index, self.dt))
+        print(delay_time)
 
         # Oblicz odległość z S = V * t / 2
         distance = self.V * delay_time / 2
+        print("distance: {}".format(distance))
 
         # Zapisz do historii
         self.distances.append(distance)
