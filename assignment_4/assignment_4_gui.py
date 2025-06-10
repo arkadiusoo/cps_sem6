@@ -15,23 +15,19 @@ class Assignment4App(QWidget):
         self.saved_signals = shared_signals if shared_signals else []
         self.results = []
         self.current_result = None
-        self.plot_lines = {}  # Store references to plot lines
-        self.plot_canvas = None  # Store reference to the current canvas
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Assignment 3 – Convolution, Filtering and Correlation")
+        self.setWindowTitle("Assignment 4")
 
         controls_layout = QVBoxLayout()
 
         self.combo_signal_selector = QComboBox()
-
         controls_layout.addWidget(QLabel("Wybierz pierwszy sygnał z Zadania 1:"))
         controls_layout.addWidget(self.combo_signal_selector)
 
         self.combo_secondary_signal = QComboBox()
-        self.label_secondary_signal = QLabel("Wybierz drugi sygnał z Zadania 1:")
-        controls_layout.addWidget(self.label_secondary_signal)
+        controls_layout.addWidget(QLabel("Wybierz drugi sygnał z Zadania 1:"))
         controls_layout.addWidget(self.combo_secondary_signal)
 
         self.list_results = QListWidget()
