@@ -9,6 +9,7 @@ from PyQt6.QtCore import QRect
 from assignment_1.assignment_1_gui import SignalGeneratorApp
 from assignment_2.assignment_2_gui import SamplingQuantizationApp
 from assignment_3.assignment_3_gui import Assignment3App
+from assignment_4.assignment_4_gui import Assignment4App
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,12 +31,14 @@ class MainWindow(QMainWindow):
         self.task1_widget = SignalGeneratorApp()
         self.task2_widget = SamplingQuantizationApp(self.task1_widget.saved_signals)
         self.task3_widget = Assignment3App(self.task1_widget.saved_signals)
+        self.task4_widget = Assignment4App(self.task1_widget.saved_signals)
 
         # Tab widget
         self.tabs = QTabWidget()
         self.tabs.addTab(self.task1_widget, "Zadanie 1")
         self.tabs.addTab(self.task2_widget, "Zadanie 2")
         self.tabs.addTab(self.task3_widget, "Zadanie 3")
+        self.tabs.addTab(self.task4_widget, "Zadanie 4")
 
         self.tabs.currentChanged.connect(self.sync_signals)
 
