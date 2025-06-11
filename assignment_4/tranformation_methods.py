@@ -19,15 +19,18 @@ def dft_from_definition(x, duration):
 
     # Compute the DFT using the formula
     X = np.zeros(N, dtype=complex)  # Initialize an array of complex numbers
-    # m - index in frequency domain
     for m in range(N):
         sum_result = 0
         # n - index in time domain
         for n in range(N):
             # Compute the DFT based on the formula: X(m) = sum(x(n) * e^(-j * 2*pi * m * n / N))
-            a = x[n]
             sum_result += x[n][1] * np.exp(-1j * 2 * np.pi * m * n / N)
         X[m] = sum_result / N  # Normalize the DFT result
+
+    # Remove negative frequencies by selecting only positive frequencies and their corresponding values
+    positive_freq_mask = freq_axis >= 0
+    freq_axis = freq_axis[positive_freq_mask]
+    X = X[positive_freq_mask]
 
     # Return the frequency domain and frequency axis
     return X, freq_axis
