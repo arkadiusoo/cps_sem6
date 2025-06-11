@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QListWidget, QScrollArea, QMessageBox, QSpinBox
 )
 
-from assignment_1.plotting_utils import MatplotlibCanvas
+
 
 # Import the transformation functions
 from assignment_4.tranformation_methods import dft_from_definition, fft_from_definition, fft_walsh_hadamard_from_definition, fft_walsh_hadamard
@@ -121,7 +121,46 @@ class Assignment4App(QWidget):
         self.plot_results()
 
     def plot_results(self):
+        import matplotlib.pyplot as plt
+        import numpy as np
         if self.results:
             freq_domain, freq_axis = self.results
-            # Perform plotting here (not implemented yet)
-            pass
+            complex_display_mode = self.combo_complex_display.currentIndex()
+
+            # Create a new figure for the plots
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
+
+            if complex_display_mode == 0:
+                # Mode 3.1: Real part on the upper plot, Imaginary part on the lower plot
+                ax1.plot(freq_axis, np.real(freq_domain), label="Re")
+                ax1.set_title("Część rzeczywista (Re)")
+                ax1.set_xlabel("Częstotliwość (Hz)")
+                ax1.set_ylabel("Amplituda")
+
+                ax2.plot(freq_axis, np.imag(freq_domain), label="Im", color="orange")
+                ax2.set_title("Część urojona (Im)")
+                ax2.set_xlabel("Częstotliwość (Hz)")
+                ax2.set_ylabel("Amplituda")
+
+            else:
+                # Mode 3.2: Magnitude on the upper plot, Phase (argument) on the lower plot
+                magnitude = np.abs(freq_domain)
+                phase = np.angle(freq_domain)
+
+                ax1.plot(freq_axis, magnitude, label="|Z|")
+                ax1.set_title("Moduł (|Z|)")
+                ax1.set_xlabel("Częstotliwość (Hz)")
+                ax1.set_ylabel("Moduł")
+
+                ax2.plot(freq_axis, phase, label="Arg(Z)", color="green")
+                ax2.set_title("Faza (Arg(Z))")
+                ax2.set_xlabel("Częstotliwość (Hz)")
+                ax2.set_ylabel("Faza (radiany)")
+
+            # Add grid to both plots
+            ax1.grid(True)
+            ax2.grid(True)
+
+            # Adjust layout and show the plots
+            plt.tight_layout()
+            plt.show()
