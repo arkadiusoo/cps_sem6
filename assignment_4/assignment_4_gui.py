@@ -4,10 +4,7 @@ from PyQt6.QtWidgets import (
 )
 
 from assignment_1.plotting_utils import MatplotlibCanvas
-from assignment_3.correlation import (manual_correlation, library_correlation, correlation_via_convolution)
-from assignment_3.convolution import (manual_convolution, library_convolution)
-from assignment_3.filter_design import (design_lowpass_fir_filter, design_highpass_fir_filter, apply_filter)
-from assignment_3.radar_simulator import RadarSimulator
+
 
 class Assignment4App(QWidget):
     def __init__(self, shared_signals=None):
@@ -20,14 +17,44 @@ class Assignment4App(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("Assignment 3 – Convolution, Filtering and Correlation")
+        self.setWindowTitle("Assignment 4 – Transformations and Signal Visualization")
 
         controls_layout = QVBoxLayout()
 
+        # Signal selector from previous task
         self.combo_signal_selector = QComboBox()
-
         controls_layout.addWidget(QLabel("Wybierz pierwszy sygnał z Zadania 1:"))
         controls_layout.addWidget(self.combo_signal_selector)
+
+        # Row for Transformation Type
+        self.label_transform_type = QLabel("Typ transformacji:")
+        self.combo_transform_type = QComboBox()
+        self.combo_transform_type.addItems([
+            "Dyskretna transformata Fouriera (DFT)",
+            "Szybka transformacja Fouriera (FFT) - decymacja w dziedzinie częstotliwości",
+            "Transformacja Walsha-Hadamarda",
+            "Szybka transformacja Walsha-Hadamarda"
+        ])
+        transform_row = QHBoxLayout()
+        transform_row.addWidget(self.label_transform_type)
+        transform_row.addWidget(self.combo_transform_type)
+        controls_layout.addLayout(transform_row)
+
+        # Row for Complex Signal Display Options
+        self.label_complex_display = QLabel("Tryb wyświetlania sygnału zespolonego:")
+        self.combo_complex_display = QComboBox()
+        self.combo_complex_display.addItems([
+            "Część rzeczywista / Część urojona",
+            "Moduł / Faza"
+        ])
+        complex_row = QHBoxLayout()
+        complex_row.addWidget(self.label_complex_display)
+        complex_row.addWidget(self.combo_complex_display)
+        controls_layout.addLayout(complex_row)
+
+        self.btn_process = QPushButton("Wykonaj operację")
+        # self.btn_process.clicked.connect(self.perform_operation)
+        controls_layout.addWidget(self.btn_process)
 
 
         self.list_results = QListWidget()
