@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QPushButton, QVBoxLayout,
-    QHBoxLayout, QListWidget, QScrollArea, QMessageBox, QSpinBox
+    QHBoxLayout, QListWidget, QScrollArea, QMessageBox, QSpinBox, QCheckBox
 )
 
 
@@ -29,6 +29,10 @@ class Assignment4App(QWidget):
         controls_layout.addWidget(QLabel("Wybierz pierwszy sygnał z Zadania 1:"))
         controls_layout.addWidget(self.combo_signal_selector)
 
+        # Checkbox for "Przykładowy sygnał"
+        self.checkbox_sample_signal = QCheckBox("Przykładowy sygnał")
+        controls_layout.addWidget(self.checkbox_sample_signal)
+
         # Row for Transformation Type
         self.label_transform_type = QLabel("Typ transformacji:")
         self.combo_transform_type = QComboBox()
@@ -54,6 +58,8 @@ class Assignment4App(QWidget):
         complex_row.addWidget(self.label_complex_display)
         complex_row.addWidget(self.combo_complex_display)
         controls_layout.addLayout(complex_row)
+
+
 
         self.btn_process = QPushButton("Wykonaj operację")
         self.btn_process.clicked.connect(self.perform_operation)
@@ -101,9 +107,12 @@ class Assignment4App(QWidget):
         # Retrieve the selected transformation type
         transform_type = self.combo_transform_type.currentText()
 
+        # Get the state of the "Przykładowy sygnał" checkbox (third parameter)
+        is_sample_signal = self.checkbox_sample_signal.isChecked()
+
         # Call the appropriate transformation function based on the selected type
         if transform_type == "Dyskretna transformata Fouriera (DFT)":
-            freq_domain, freq_axis = dft_from_definition(signal_data, duration)
+            freq_domain, freq_axis = dft_from_definition(signal_data, duration, is_sample_signal)
         elif transform_type == "Szybka transformacja Fouriera (FFT) - decymacja w dziedzinie częstotliwości":
             freq_domain, freq_axis = fft_from_definition(signal_data, duration)
         elif transform_type == "Transformacja Walsha-Hadamarda":
