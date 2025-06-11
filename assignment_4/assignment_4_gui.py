@@ -53,7 +53,7 @@ class Assignment4App(QWidget):
         controls_layout.addLayout(complex_row)
 
         self.btn_process = QPushButton("Wykonaj operację")
-        # self.btn_process.clicked.connect(self.perform_operation)
+        self.btn_process.clicked.connect(self.perform_operation)
         controls_layout.addWidget(self.btn_process)
 
 
@@ -82,3 +82,8 @@ class Assignment4App(QWidget):
         for signal_info in self.saved_signals:
             self.combo_signal_selector.addItem(signal_info[0])
 
+    # self.saved_signals[id][4][2] <- there is duration
+    # self.saved_signals[id][0] <- there is name
+    # self.saved_signals[id][1] <- there is signal list
+    def perform_operation(self):
+        print(self.saved_signals[0][4][2])
