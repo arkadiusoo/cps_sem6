@@ -25,8 +25,18 @@ def dft_from_definition(x, duration):
         # n - index in time domain
         for n in range(N):
             # Compute the DFT based on the formula: X(m) = sum(x(n) * e^(-j * 2*pi * m * n / N))
-            sum_result += x[n] * np.exp(-1j * 2 * np.pi * m * n / N)
+            a = x[n]
+            sum_result += x[n][1] * np.exp(-1j * 2 * np.pi * m * n / N)
         X[m] = sum_result / N  # Normalize the DFT result
 
     # Return the frequency domain and frequency axis
     return X, freq_axis
+
+def fft_from_definition(x, duration):
+    return 0
+
+def fft_walsh_hadamard_from_definition(x, duration):
+    return 0
+
+def fft_walsh_hadamard(x, duration):
+    return 0

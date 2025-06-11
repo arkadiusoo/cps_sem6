@@ -5,6 +5,9 @@ from PyQt6.QtWidgets import (
 
 from assignment_1.plotting_utils import MatplotlibCanvas
 
+# Import the transformation functions
+from assignment_4.tranformation_methods import dft_from_definition, fft_from_definition, fft_walsh_hadamard_from_definition, fft_walsh_hadamard
+
 
 class Assignment4App(QWidget):
     def __init__(self, shared_signals=None):
@@ -86,4 +89,39 @@ class Assignment4App(QWidget):
     # self.saved_signals[id][0] <- there is name
     # self.saved_signals[id][1] <- there is signal list
     def perform_operation(self):
-        print(self.saved_signals[0][4][2])
+        # Retrieve the selected signal
+        selected_signal_index = self.combo_signal_selector.currentIndex()
+        if selected_signal_index < 0 or selected_signal_index >= len(self.saved_signals):
+            print("No signal selected or invalid index.")
+            return
+        signal_info = self.saved_signals[selected_signal_index]
+        signal_data = signal_info[1]  # The signal list
+        duration = signal_info[4][2]
+
+        # Retrieve the selected transformation type
+        transform_type = self.combo_transform_type.currentText()
+
+        # Call the appropriate transformation function based on the selected type
+        if transform_type == "Dyskretna transformata Fouriera (DFT)":
+            freq_domain, freq_axis = dft_from_definition(signal_data, duration)
+        elif transform_type == "Szybka transformacja Fouriera (FFT) - decymacja w dziedzinie częstotliwości":
+            freq_domain, freq_axis = fft_from_definition(signal_data, duration)
+        elif transform_type == "Transformacja Walsha-Hadamarda":
+            freq_domain, freq_axis = fft_walsh_hadamard_from_definition(signal_data, duration)
+        elif transform_type == "Szybka transformacja Walsha-Hadamarda":
+            freq_domain, freq_axis = fft_walsh_hadamard(signal_data, duration)
+        else:
+            print("Invalid transformation type selected.")
+            return
+
+        # Now you have freq_domain and freq_axis for further processing (e.g., plotting)
+        self.results = (freq_domain, freq_axis)
+        print("Frequency domain:", freq_domain)
+        print("Frequency axis:", freq_axis)
+        self.plot_results()
+
+    def plot_results(self):
+        if self.results:
+            freq_domain, freq_axis = self.results
+            # Perform plotting here (not implemented yet)
+            pass
