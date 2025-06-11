@@ -64,6 +64,13 @@ class MainWindow(QMainWindow):
             for signal in combined_signals:
                 self.task3_widget.combo_signal_selector.addItem(signal[0])
                 self.task3_widget.combo_secondary_signal.addItem(signal[0])
+        if index == 3:
+            combined_signals = self.task1_widget.saved_signals + self.task2_widget.quantized_signals
+            self.task4_widget.saved_signals = combined_signals
+            self.task4_widget.saved_signals = combined_signals
+            self.task4_widget.combo_signal_selector.clear()
+            for signal in combined_signals:
+                self.task4_widget.combo_signal_selector.addItem(signal[0])
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

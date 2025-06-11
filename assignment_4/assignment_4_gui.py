@@ -29,10 +29,6 @@ class Assignment4App(QWidget):
         controls_layout.addWidget(QLabel("Wybierz pierwszy sygnał z Zadania 1:"))
         controls_layout.addWidget(self.combo_signal_selector)
 
-        self.combo_secondary_signal = QComboBox()
-        self.label_secondary_signal = QLabel("Wybierz drugi sygnał z Zadania 1:")
-        controls_layout.addWidget(self.label_secondary_signal)
-        controls_layout.addWidget(self.combo_secondary_signal)
 
         self.list_results = QListWidget()
         self.list_results.setFixedWidth(250)
@@ -56,8 +52,6 @@ class Assignment4App(QWidget):
 
     def update_signal_selector(self):
         self.combo_signal_selector.clear()
-        self.combo_secondary_signal.clear()
         for signal_info in self.saved_signals:
             self.combo_signal_selector.addItem(signal_info[0])
-            self.combo_secondary_signal.addItem(signal_info[0])
 
