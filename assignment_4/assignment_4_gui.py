@@ -13,7 +13,7 @@ class Assignment4App(QWidget):
     def __init__(self, shared_signals=None):
         super().__init__()
         self.saved_signals = shared_signals if shared_signals else []
-        self.results = []
+        self.results = []  # List of (label, (freq_domain, freq_axis, transform_type, signal_name, is_sample_signal))
         self.current_result = None
         self.plot_lines = {}  # Store references to plot lines
         self.plot_canvas = None  # Store reference to the current canvas
@@ -68,6 +68,7 @@ class Assignment4App(QWidget):
 
         self.list_results = QListWidget()
         self.list_results.setFixedWidth(250)
+        self.list_results.itemClicked.connect(self.display_selected_result)
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -123,13 +124,15 @@ class Assignment4App(QWidget):
             print("Invalid transformation type selected.")
             return
 
-        # Now you have freq_domain and freq_axis for further processing (e.g., plotting)
-        self.results = (freq_domain, freq_axis)
-        print("Frequency domain:", freq_domain)
-        print("Frequency axis:", freq_axis)
+        # Build label for history
+        label = f"[{len(self.results)+1}] {transform_type}: {signal_info[0]}"
+        # Save result in history
+        self.results.append((label, (freq_domain, freq_axis, transform_type, signal_info[0], is_sample_signal)))
+        self.list_results.addItem(label)
+        # Plot latest result
         self.plot_results()
 
-    def plot_results(self):
+    def plot_results(self, result=None):
         import numpy as np
         # Remove previous widgets (including previous plot) from scroll_layout
         for i in reversed(range(self.scroll_layout.count())):
@@ -140,56 +143,76 @@ class Assignment4App(QWidget):
         # Clear previous plot canvas reference
         self.plot_canvas = None
 
-        if self.results:
-            freq_domain, freq_axis = self.results
-            complex_display_mode = self.combo_complex_display.currentIndex()
+        # Determine which result to plot
+        if result is not None:
+            freq_domain, freq_axis, transform_type, signal_name, is_sample_signal = result
+        elif self.results:
+            # Use the latest result
+            freq_domain, freq_axis, transform_type, signal_name, is_sample_signal = self.results[-1][1]
+        else:
+            return
 
-            # Create a MatplotlibCanvas and use two subplots
-            canvas = MatplotlibCanvas(self)
-            fig = canvas.figure
-            fig.clear()
-            ax1 = fig.add_subplot(2, 1, 1)
-            ax2 = fig.add_subplot(2, 1, 2)
+        complex_display_mode = self.combo_complex_display.currentIndex()
 
-            if complex_display_mode == 0:
-                # Real/Imaginary
-                ax1.plot(freq_axis, np.real(freq_domain), label="Re")
-                ax1.set_title("Część rzeczywista (Re)")
-                ax1.set_xlabel("Częstotliwość (Hz)")
-                ax1.set_ylabel("Amplituda")
+        # Create a MatplotlibCanvas and use two subplots
+        canvas = MatplotlibCanvas(self)
+        fig = canvas.figure
+        fig.clear()
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2)
 
-                ax2.plot(freq_axis, np.imag(freq_domain), label="Im", color="orange")
-                ax2.set_title("Część urojona (Im)")
-                ax2.set_xlabel("Częstotliwość (Hz)")
-                ax2.set_ylabel("Amplituda")
-            else:
-                # Magnitude/Phase
-                magnitude = np.abs(freq_domain)
-                phase = np.angle(freq_domain)
+        if complex_display_mode == 0:
+            # Real/Imaginary
+            ax1.plot(freq_axis, np.real(freq_domain), label="Re")
+            ax1.set_title("Część rzeczywista (Re)")
+            ax1.set_xlabel("Częstotliwość (Hz)")
+            ax1.set_ylabel("Amplituda")
 
-                ax1.plot(freq_axis, magnitude, label="|Z|")
-                ax1.set_title("Moduł (|Z|)")
-                ax1.set_xlabel("Częstotliwość (Hz)")
-                ax1.set_ylabel("Moduł")
+            ax2.plot(freq_axis, np.imag(freq_domain), label="Im", color="orange")
+            ax2.set_title("Część urojona (Im)")
+            ax2.set_xlabel("Częstotliwość (Hz)")
+            ax2.set_ylabel("Amplituda")
+        else:
+            # Magnitude/Phase
+            magnitude = np.abs(freq_domain)
+            phase = np.angle(freq_domain)
 
-                ax2.plot(freq_axis, phase, label="Arg(Z)", color="green")
-                ax2.set_title("Faza (Arg(Z))")
-                ax2.set_xlabel("Częstotliwość (Hz)")
-                ax2.set_ylabel("Faza (radiany)")
+            ax1.plot(freq_axis, magnitude, label="|Z|")
+            ax1.set_title("Moduł (|Z|)")
+            ax1.set_xlabel("Częstotliwość (Hz)")
+            ax1.set_ylabel("Moduł")
 
-            ax1.grid(True)
-            ax2.grid(True)
-            fig.tight_layout()
-            canvas.draw()
-            self.scroll_layout.addWidget(canvas)
-            self.plot_canvas = canvas
+            ax2.plot(freq_axis, phase, label="Arg(Z)", color="green")
+            ax2.set_title("Faza (Arg(Z))")
+            ax2.set_xlabel("Częstotliwość (Hz)")
+            ax2.set_ylabel("Faza (radiany)")
+
+        ax1.grid(True)
+        ax2.grid(True)
+        fig.tight_layout()
+        canvas.draw()
+        self.scroll_layout.addWidget(canvas)
+        self.plot_canvas = canvas
 
         # Connect combo_complex_display to update the plot when toggled
         def on_display_mode_changed():
-            self.plot_results()
+            # Redraw the currently selected result, or latest if none selected
+            if self.list_results.currentRow() >= 0:
+                idx = self.list_results.currentRow()
+                _, res = self.results[idx]
+                self.plot_results(res)
+            else:
+                self.plot_results()
         # Disconnect previous connections to avoid multiple triggers
         try:
             self.combo_complex_display.currentIndexChanged.disconnect()
         except Exception:
             pass
         self.combo_complex_display.currentIndexChanged.connect(on_display_mode_changed)
+
+    def display_selected_result(self, item):
+        idx = self.list_results.row(item)
+        if idx < 0 or idx >= len(self.results):
+            return
+        label, result_tuple = self.results[idx]
+        self.plot_results(result_tuple)
