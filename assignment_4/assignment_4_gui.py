@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import (
 
 # Import the transformation functions
 from assignment_4.tranformation_methods import dft_from_definition, fft_from_definition, fft_walsh_hadamard_from_definition, fft_walsh_hadamard
-
+from assignment_1.plotting_utils import MatplotlibCanvas
 
 class Assignment4App(QWidget):
     def __init__(self, shared_signals=None):
@@ -130,17 +130,29 @@ class Assignment4App(QWidget):
         self.plot_results()
 
     def plot_results(self):
-        import matplotlib.pyplot as plt
         import numpy as np
+        # Remove previous widgets (including previous plot) from scroll_layout
+        for i in reversed(range(self.scroll_layout.count())):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget:
+                widget.setParent(None)
+
+        # Clear previous plot canvas reference
+        self.plot_canvas = None
+
         if self.results:
             freq_domain, freq_axis = self.results
             complex_display_mode = self.combo_complex_display.currentIndex()
 
-            # Create a new figure for the plots
-            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
+            # Create a MatplotlibCanvas and use two subplots
+            canvas = MatplotlibCanvas(self)
+            fig = canvas.figure
+            fig.clear()
+            ax1 = fig.add_subplot(2, 1, 1)
+            ax2 = fig.add_subplot(2, 1, 2)
 
             if complex_display_mode == 0:
-                # Mode 3.1: Real part on the upper plot, Imaginary part on the lower plot
+                # Real/Imaginary
                 ax1.plot(freq_axis, np.real(freq_domain), label="Re")
                 ax1.set_title("Część rzeczywista (Re)")
                 ax1.set_xlabel("Częstotliwość (Hz)")
@@ -150,9 +162,8 @@ class Assignment4App(QWidget):
                 ax2.set_title("Część urojona (Im)")
                 ax2.set_xlabel("Częstotliwość (Hz)")
                 ax2.set_ylabel("Amplituda")
-
             else:
-                # Mode 3.2: Magnitude on the upper plot, Phase (argument) on the lower plot
+                # Magnitude/Phase
                 magnitude = np.abs(freq_domain)
                 phase = np.angle(freq_domain)
 
@@ -166,10 +177,19 @@ class Assignment4App(QWidget):
                 ax2.set_xlabel("Częstotliwość (Hz)")
                 ax2.set_ylabel("Faza (radiany)")
 
-            # Add grid to both plots
             ax1.grid(True)
             ax2.grid(True)
+            fig.tight_layout()
+            canvas.draw()
+            self.scroll_layout.addWidget(canvas)
+            self.plot_canvas = canvas
 
-            # Adjust layout and show the plots
-            plt.tight_layout()
-            plt.show()
+        # Connect combo_complex_display to update the plot when toggled
+        def on_display_mode_changed():
+            self.plot_results()
+        # Disconnect previous connections to avoid multiple triggers
+        try:
+            self.combo_complex_display.currentIndexChanged.disconnect()
+        except Exception:
+            pass
+        self.combo_complex_display.currentIndexChanged.connect(on_display_mode_changed)
