@@ -161,14 +161,16 @@ class Assignment4App(QWidget):
         ax1 = fig.add_subplot(2, 1, 1)
         ax2 = fig.add_subplot(2, 1, 2)
 
+        x_data = np.arange(len(freq_domain))
+
         if complex_display_mode == 0:
             # Real/Imaginary
-            ax1.plot(freq_axis, np.real(freq_domain), label="Re")
+            ax1.plot(x_data, np.real(freq_domain), label="Re")
             ax1.set_title("Część rzeczywista (Re)")
             ax1.set_xlabel("Częstotliwość (Hz)")
             ax1.set_ylabel("Amplituda")
 
-            ax2.plot(freq_axis, np.imag(freq_domain), label="Im", color="orange")
+            ax2.plot(x_data, np.imag(freq_domain), label="Im", color="orange")
             ax2.set_title("Część urojona (Im)")
             ax2.set_xlabel("Częstotliwość (Hz)")
             ax2.set_ylabel("Amplituda")
@@ -177,12 +179,12 @@ class Assignment4App(QWidget):
             magnitude = np.abs(freq_domain)
             phase = np.angle(freq_domain)
 
-            ax1.plot(freq_axis, magnitude, label="|Z|")
+            ax1.plot(x_data, magnitude, label="|Z|")
             ax1.set_title("Moduł (|Z|)")
             ax1.set_xlabel("Częstotliwość (Hz)")
             ax1.set_ylabel("Moduł")
 
-            ax2.plot(freq_axis, phase, label="Arg(Z)", color="green")
+            ax2.plot(x_data, phase, label="Arg(Z)", color="green")
             ax2.set_title("Faza (Arg(Z))")
             ax2.set_xlabel("Częstotliwość (Hz)")
             ax2.set_ylabel("Faza (radiany)")
