@@ -115,7 +115,7 @@ class Assignment4App(QWidget):
         if transform_type == "Dyskretna transformata Fouriera (DFT)":
             freq_domain, freq_axis = dft_from_definition(signal_data, duration, is_sample_signal)
         elif transform_type == "Szybka transformacja Fouriera (FFT) - decymacja w dziedzinie częstotliwości":
-            freq_domain, freq_axis = fft_from_definition(signal_data, duration)
+            freq_domain, freq_axis = fft_from_definition(signal_data, duration, is_sample_signal)
         elif transform_type == "Transformacja Walsha-Hadamarda":
             freq_domain, freq_axis = fft_walsh_hadamard_from_definition(signal_data, duration)
         elif transform_type == "Szybka transformacja Walsha-Hadamarda":
@@ -167,12 +167,12 @@ class Assignment4App(QWidget):
             # Real/Imaginary
             ax1.plot(x_data, np.real(freq_domain), label="Re")
             ax1.set_title("Część rzeczywista (Re)")
-            ax1.set_xlabel("Częstotliwość (Hz)")
+            # ax1.set_xlabel("Częstotliwość (Hz)")
             ax1.set_ylabel("Amplituda")
 
             ax2.plot(x_data, np.imag(freq_domain), label="Im", color="orange")
             ax2.set_title("Część urojona (Im)")
-            ax2.set_xlabel("Częstotliwość (Hz)")
+            # ax2.set_xlabel("Częstotliwość (Hz)")
             ax2.set_ylabel("Amplituda")
         else:
             # Magnitude/Phase
@@ -181,12 +181,12 @@ class Assignment4App(QWidget):
 
             ax1.plot(x_data, magnitude, label="|Z|")
             ax1.set_title("Moduł (|Z|)")
-            ax1.set_xlabel("Częstotliwość (Hz)")
+            # ax1.set_xlabel("Częstotliwość (Hz)")
             ax1.set_ylabel("Moduł")
 
             ax2.plot(x_data, phase, label="Arg(Z)", color="green")
             ax2.set_title("Faza (Arg(Z))")
-            ax2.set_xlabel("Częstotliwość (Hz)")
+            # ax2.set_xlabel("Częstotliwość (Hz)")
             ax2.set_ylabel("Faza (radiany)")
 
         ax1.grid(True)
