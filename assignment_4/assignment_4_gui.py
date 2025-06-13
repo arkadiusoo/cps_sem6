@@ -170,7 +170,7 @@ class Assignment4App(QWidget):
                 freq_domain = np.array(freq_domain)
             canvas.ax.plot(freq_axis, freq_domain.real)
             canvas.ax.set_title(transform_type)
-            canvas.ax.set_xlabel("Indeks")
+
             canvas.ax.set_ylabel("Amplituda")
             canvas.draw()
             self.scroll_layout.addWidget(canvas)
