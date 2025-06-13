@@ -244,6 +244,7 @@ class Assignment4App(QWidget):
         if idx < 0 or idx >= len(self.results):
             return
         label, result_tuple = self.results[idx]
+        self.current_result = self.results[idx]
         self.plot_results(result_tuple)
 
     def save_result_to_file(self):
@@ -255,7 +256,7 @@ class Assignment4App(QWidget):
         if not filename:
             return
 
-        label, (freq_domain, freq_axis, transform_type, signal_name, is_sample_signal) = self.results[-1]
+        label, (freq_domain, freq_axis, transform_type, signal_name, is_sample_signal) = self.current_result
         np.savez(filename, freq_domain=freq_domain, freq_axis=freq_axis,
                  transform_type=transform_type, signal_name=signal_name, is_sample_signal=is_sample_signal)
 
