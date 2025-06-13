@@ -1130,9 +1130,11 @@ def fft_walsh_hadamard_from_definition(x, duration, example_signal=False):
         N = len(x)
         sampling_rate = N / duration
 
-    # Ensure N is a power of 2
-    if not (N != 0 and ((N & (N - 1)) == 0)):
-        raise ValueError("Length of input signal must be a power of 2.")
+    # Pad signal to the next power of 2
+    next_pow_2 = 1 << (N - 1).bit_length()
+    if N < next_pow_2:
+        x += [[0, 0]] * (next_pow_2 - N)
+        N = next_pow_2
 
     # Recursive Hadamard matrix generator
     def hadamard_matrix(m):
