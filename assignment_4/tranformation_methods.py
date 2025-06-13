@@ -364,6 +364,9 @@ def dft_from_definition(x, duration, example_signal=False):
     # Calculate the frequency axis - d - gap between probes, this is X(m) in equation
     freq_axis = np.fft.fftfreq(N, d=1/sampling_rate)
 
+    import time
+    start_time = time.time()
+
     # Compute the DFT using the formula
     X = np.zeros(N, dtype=complex)  # Initialize an array of complex numbers
     for m in range(N):
@@ -374,6 +377,8 @@ def dft_from_definition(x, duration, example_signal=False):
             sum_result += x[n][1] * np.exp(-1j * 2 * np.pi * m * n / N)
         X[m] = sum_result / N  # Normalize the DFT result
 
+    end_time = time.time()
+    print(f"Execution time [dft_from_definition]: {end_time - start_time:.6f} seconds")
 
     return X, freq_axis
 
@@ -752,6 +757,9 @@ def fft_from_definition(x, duration, example_signal):
     bits = int(np.log2(N))
     x = np.array([x[bit_reverse(i, bits)] for i in range(N)])
 
+    import time
+    start_time = time.time()
+
     # FFT computation with decimation in frequency
     m = 1
     while m < N:
@@ -764,6 +772,9 @@ def fft_from_definition(x, duration, example_signal):
                 x[k + j] = u + t
                 x[k + j + m] = u - t
         m = step
+
+    end_time = time.time()
+    print(f"Execution time [fft_from_definition]: {end_time - start_time:.6f} seconds")
 
     # Normalize the result to match DFT definition (division by N)
     return x / N, freq_axis
@@ -1130,6 +1141,9 @@ def fft_walsh_hadamard_from_definition(x, duration, example_signal=False):
         N = len(x)
         sampling_rate = N / duration
 
+    import time
+    start_time = time.time()
+
     # Pad signal to the next power of 2
     next_pow_2 = 1 << (N - 1).bit_length()
     if N < next_pow_2:
@@ -1149,6 +1163,8 @@ def fft_walsh_hadamard_from_definition(x, duration, example_signal=False):
     Hm = hadamard_matrix(m)
 
     transformed = Hm @ x
+    end_time = time.time()
+    print(f"Execution time [fft_walsh_hadamard_from_definition]: {end_time - start_time:.6f} seconds")
     return transformed, np.arange(N)
 
 def fft_walsh_hadamard(x, duration):
@@ -1163,6 +1179,9 @@ def fft_walsh_hadamard(x, duration):
     - transformed (np.array): Signal in the Walsh-Hadamard domain.
     - index_axis (np.array): Axis labels (0 to N-1).
     """
+    import time
+    start_time = time.time()
+
     # Extract only the values
     x = np.array([val[1] for val in x])
 
@@ -1191,5 +1210,6 @@ def fft_walsh_hadamard(x, duration):
 
     # Ensure output is always a numpy array
     x = np.array(x)
-    print(x)
+    end_time = time.time()
+    print(f"Execution time [fft_walsh_hadamard]: {end_time - start_time:.6f} seconds")
     return np.array(x), np.arange(N)
