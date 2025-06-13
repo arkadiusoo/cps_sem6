@@ -156,8 +156,9 @@ class Assignment4App(QWidget):
             self.label_complex_display.setVisible(False)
             self.combo_complex_display.setVisible(False)
             canvas = MatplotlibCanvas(self)
-            freq_domain = [val[1] for val in freq_domain]
-            freq_domain = np.array(freq_domain)
+            if transform_type == "Transformacja Walsha-Hadamarda":
+                freq_domain = [val[1] for val in freq_domain]
+                freq_domain = np.array(freq_domain)
             canvas.ax.plot(freq_axis, freq_domain.real)
             canvas.ax.set_title(transform_type)
             canvas.ax.set_xlabel("Indeks")

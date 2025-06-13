@@ -1152,4 +1152,44 @@ def fft_walsh_hadamard_from_definition(x, duration, example_signal=False):
     return transformed, np.arange(N)
 
 def fft_walsh_hadamard(x, duration):
-    return 0
+    """
+    Perform Fast Walsh-Hadamard Transform using the butterfly algorithm.
+
+    Args:
+    - x (list or np.array): Input signal in the time domain.
+    - duration (float): Not used.
+
+    Returns:
+    - transformed (np.array): Signal in the Walsh-Hadamard domain.
+    - index_axis (np.array): Axis labels (0 to N-1).
+    """
+    # Extract only the values
+    x = np.array([val[1] for val in x])
+
+    # Pad to next power of 2 if needed
+    N = len(x)
+    next_pow_2 = 1 << (N - 1).bit_length()
+    if N < next_pow_2:
+        x = np.append(x, [0] * (next_pow_2 - N))
+        N = next_pow_2
+
+    x = x.astype(float)
+
+    # Fast Walsh-Hadamard Transform (in-place)
+    h = 1
+    while h < N:
+        for i in range(0, N, h * 2):
+            for j in range(i, i + h):
+                u = x[j]
+                v = x[j + h]
+                x[j] = u + v
+                x[j + h] = u - v
+        h *= 2
+
+    # Normalize result (optional)
+    x = x / np.sqrt(N)
+
+    # Ensure output is always a numpy array
+    x = np.array(x)
+    print(x)
+    return np.array(x), np.arange(N)
