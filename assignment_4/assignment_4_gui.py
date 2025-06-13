@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QComboBox, QPushButton, QVBoxLayout,
-    QHBoxLayout, QListWidget, QScrollArea, QMessageBox, QSpinBox, QCheckBox
+    QHBoxLayout, QListWidget, QScrollArea, QMessageBox, QSpinBox, QCheckBox,
+    QFileDialog
 )
-
+import numpy as np
 
 
 # Import the transformation functions
@@ -64,6 +65,14 @@ class Assignment4App(QWidget):
         self.btn_process = QPushButton("Wykonaj operację")
         self.btn_process.clicked.connect(self.perform_operation)
         controls_layout.addWidget(self.btn_process)
+
+        self.btn_save_result = QPushButton("Zapisz wynik do pliku")
+        self.btn_save_result.clicked.connect(self.save_result_to_file)
+        controls_layout.addWidget(self.btn_save_result)
+
+        self.btn_load_result = QPushButton("Wczytaj wynik z pliku")
+        self.btn_load_result.clicked.connect(self.load_result_from_file)
+        controls_layout.addWidget(self.btn_load_result)
 
 
         self.list_results = QListWidget()
@@ -236,3 +245,36 @@ class Assignment4App(QWidget):
             return
         label, result_tuple = self.results[idx]
         self.plot_results(result_tuple)
+
+    def save_result_to_file(self):
+        if not self.results:
+            QMessageBox.warning(self, "Brak wyników", "Nie ma żadnego wyniku do zapisania.")
+            return
+
+        filename, _ = QFileDialog.getSaveFileName(self, "Zapisz wynik do pliku", "", "NumPy files (*.npz)")
+        if not filename:
+            return
+
+        label, (freq_domain, freq_axis, transform_type, signal_name, is_sample_signal) = self.results[-1]
+        np.savez(filename, freq_domain=freq_domain, freq_axis=freq_axis,
+                 transform_type=transform_type, signal_name=signal_name, is_sample_signal=is_sample_signal)
+
+    def load_result_from_file(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Wczytaj wynik z pliku", "", "NumPy files (*.npz)")
+        if not filename:
+            return
+
+        try:
+            data = np.load(filename, allow_pickle=True)
+            freq_domain = data["freq_domain"]
+            freq_axis = data["freq_axis"]
+            transform_type = str(data["transform_type"])
+            signal_name = str(data["signal_name"])
+            is_sample_signal = bool(data["is_sample_signal"])
+
+            label = f"[{len(self.results)+1}] {transform_type}: {signal_name}"
+            self.results.append((label, (freq_domain, freq_axis, transform_type, signal_name, is_sample_signal)))
+            self.list_results.addItem(label)
+            self.plot_results()
+        except Exception as e:
+            QMessageBox.critical(self, "Błąd", f"Nie udało się wczytać pliku: {e}")
