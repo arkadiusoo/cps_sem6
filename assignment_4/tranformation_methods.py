@@ -1553,7 +1553,7 @@ def fft_walsh_hadamard(x, duration, example_signal=False):
                 x[j + h] = u - v
         h *= 2
 
-    # Normalize result (optional)
+    # Normalize result
     x = x / np.sqrt(N)
 
     # Ensure output is always a numpy array
