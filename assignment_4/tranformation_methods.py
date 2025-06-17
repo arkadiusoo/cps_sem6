@@ -1542,7 +1542,7 @@ def fft_walsh_hadamard(x, duration, example_signal=False):
 
     x = x.astype(float)
 
-    # Fast Walsh-Hadamard Transform (in-place)
+    # Fast Walsh-Hadamard Transform
     h = 1
     while h < N:
         for i in range(0, N, h * 2):
