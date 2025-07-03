@@ -81,3 +81,35 @@ This task focuses on signal processing operations such as convolution, correlati
   - Operation selection and parameter input
   - Dynamic plotting with matplotlib
   - Result history with comparison
+
+---
+ ## Assignment 4 – Transformations and Frequency Analysis
+
+This task implements various discrete transformations for analyzing signals in the frequency and spectral domains.
+
+### Implemented Features
+
+- **Transformations supported**:
+  - Discrete Fourier Transform (DFT)
+  - Fast Fourier Transform (FFT) using Decimation-in-Frequency (DIF)
+  - Walsh-Hadamard Transform (WHT)
+  - Fast Walsh-Hadamard Transform (FWHT)
+
+- **Interactive GUI (PyQt6)**:
+  - Selection of signals from Assignment 1 or example signals
+  - Transformation type selection and execution
+  - Visualization modes for complex-valued transforms:
+    - Real / Imaginary parts
+    - Magnitude / Phase
+
+- **Visualization using matplotlib**:
+  - Frequency domain plots with subplots for amplitude and phase components
+
+- **Result management**:
+  - Result history with labels
+  - Save and load transform results from `.npz` files
+
+- **Performance metrics**:
+  - Execution time of each transform function printed to console
+
+- **Automatic zero-padding** for non-power-of-two lengths (for Walsh-Hadamard)
